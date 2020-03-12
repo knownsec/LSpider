@@ -73,9 +73,6 @@ tmp/
 # Cobra automation report image file
 scheduler/reports/
 
-# venv
-cobra-venv/*
-
 # phply
 parsetab.py
 
@@ -100,3 +97,4 @@ db.sqlite3
 db.sqlite3*
 
 /venv/
+/LSpider/settings.py
