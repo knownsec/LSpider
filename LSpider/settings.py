@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'web.index.apps.IndexConfig',
-    'web.spider.apps.SpiderConfig',
+    'web.index',
+    'web.spider',
 ]
 
 MIDDLEWARE = [
@@ -79,15 +79,19 @@ WSGI_APPLICATION = 'LSpider.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'LSpider',
+        'NAME': 'lspider',
         'USER': 'root',
-        'PASSWORD': 'lspider123!@#',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': 'SET default_storage_engine=INNODB;SET NAMES utf8mb4',
             'charset': 'utf8mb4',
-        }
+        },
+        'TEST': {
+            'CHARSET': 'utf8',
+            'COLLATION': 'utf8_general_ci',
+        },
     }
 }
 
@@ -162,4 +166,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.path.join(BASE_DIR, '/static/')
+
+
+# Chrome webdriver
+CHROME_WEBDRIVER_PATH = os.path.join(BASE_DIR, 'bin/')
+
+# setting for spider
+
+LIMIT_DEEP = 2
+THREADPOOL_MAX_THREAD_NUM = 5
+
+# rabbitmq
+RABBITMQ_IP = "212.129.137.248"
+RABBITMQ_PORT = "1456"
+RABBITMQ_USERNAME = "lspider"
+RABBITMQ_PASSWORD = "lspiderrabbit123"
+RABBITMQ_VHOST = "rabbitmq"
