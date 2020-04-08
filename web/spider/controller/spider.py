@@ -106,15 +106,14 @@ class SpiderCore:
                 result_list = html_parser(content)
                 result_list = url_parser(target['url'], result_list, target['deep'])
 
-                print(result_list)
                 # 继续把链接加入列表
                 for target in result_list:
 
-                    if target['deep'] > LIMIT_DEEP:
-                        continue
-
                     # save to rabbitmq
                     self.rabbitmq_handler.new_scan_target(str(target))
+
+                    if target['deep'] > LIMIT_DEEP:
+                        continue
 
                     self.target_list.put(target)
 

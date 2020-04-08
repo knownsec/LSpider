@@ -9,7 +9,7 @@
 '''
 
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 from web.spider.models import SubDomainList, UrlTable
 from web.index.models import BanList
@@ -111,7 +111,7 @@ def url_filter(target_list):
                 temp_list[flag] = [target]
 
             else:
-                if check_path_same(flag, temp_list[flag], target):
+                if check_same(flag, temp_list[flag], target):
                     # 直接存入url
                     temp_list[flag].append(target)
 
@@ -122,7 +122,7 @@ def url_filter(target_list):
     return result_list
 
 
-def check_path_same(flag, origin_target_list, new_target):
+def check_same(flag, origin_target_list, new_target):
     """
     检查相似性
 
@@ -130,12 +130,14 @@ def check_path_same(flag, origin_target_list, new_target):
     """
 
     check_flag = True
-    BANWORD_LAST_LIST = ['.html', '.htm']
+    BANWORD_LAST_LIST = ['.html', '.htm', '.png', '.jpg', '.mp']
 
     for origin_target in origin_target_list:
 
         i = 0
         diff = 0
+
+        # false 是相似 true 是不想似
         check_flag_one = False
 
         origin_path = origin_target.path.split('/')
@@ -166,6 +168,24 @@ def check_path_same(flag, origin_target_list, new_target):
                         check_flag_one = True
 
             i += 1
+
+        # 参数重复判定
+        if not check_flag_one:
+            # 如果path判定相似，那么会进入参数重复判定
+            origin_query = parse_qs(origin_target.query)
+            new_target_query = parse_qs(new_target.query)
+
+            if not origin_query and not new_target_query:
+                check_flag_one = False
+
+            if (not origin_query and new_target_query) or (origin_query and not new_target_query):
+                # 如果一个有参数一个无参数那么不想似
+                check_flag_one = True
+
+            for key in origin_query:
+                if key not in new_target_query:
+                    # 如果参数不相同，那么不想似
+                    check_flag_one = True
 
         check_flag = check_flag & check_flag_one
 

@@ -55,7 +55,7 @@ class ChromeDriver:
         self.driver.set_page_load_timeout(15)
         self.driver.set_script_timeout(5)
 
-    def get_resp(self, url):
+    def get_resp(self, url, times=0):
 
         try:
             self.origin_url = url
@@ -65,7 +65,16 @@ class ChromeDriver:
             # self.click_page()
 
         except selenium.common.exceptions.TimeoutException:
-            logger.warning("Chrome Headless request timeout..{}".format(url))
+            logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
+            if times > 0:
+                return False
+
+            logger.warning("[ChromeHeadless]repeat once..{}".format(url))
+            self.get_resp(url, times+1)
+            return False
+
+        except selenium.common.exceptions.InvalidArgumentException:
+            logger.warning("[ChromeHeadless]Request error...{}".format(url))
             return False
 
         return self.driver.page_source
