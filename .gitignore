@@ -96,10 +96,10 @@ uploads/*
 db.sqlite3
 db.sqlite3*
 
-venv/
-LSpider/settings.py
+venv/*
+settings.py
 
 # webdriver
-bin/
+bin/*
 ghostdriver.log
 debug.log

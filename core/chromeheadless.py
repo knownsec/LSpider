@@ -31,7 +31,16 @@ class ChromeDriver:
         self.chromedriver_path = CHROME_WEBDRIVER_PATH
         self.checkos()
 
-        self.init_object()
+        try:
+            self.init_object()
+
+        except selenium.common.exceptions.SessionNotCreatedException:
+            logger.error("[Chrome Headless] ChromeDriver version wrong error.")
+            exit(0)
+
+        except selenium.common.exceptions.WebDriverException:
+            logger.error("[Chrome Headless] ChromeDriver load error.")
+            exit(0)
 
         self.origin_url = ""
 

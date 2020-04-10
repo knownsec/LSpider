@@ -52,7 +52,7 @@ class PrescanCore:
 
                 # check exist
                 s = SubDomainList.objects.filter(subdomain=subdomain)
-                if not s:
+                if s:
                     continue
 
                 s1 = SubDomainList(subdomain=subdomain, lastscan='1970-01-01 01:01:01')
