@@ -5,7 +5,6 @@ from django.db import models
 
 
 class SubDomainList(models.Model):
-    scanid = models.IntegerField()
     subdomain = models.CharField(max_length=50)
     lastscan = models.DateTimeField()
 
@@ -19,4 +18,4 @@ URL_TYPE = {
 class UrlTable(models.Model):
     domain = models.CharField(max_length=50)
     type = models.CharField(max_length=10, default='link')
-    url = models.CharField(max_length=200)
+    url = models.CharField(max_length=500)

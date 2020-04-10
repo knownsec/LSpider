@@ -21,7 +21,7 @@ from selenium.common.exceptions import WebDriverException
 import os
 from urllib.parse import urlparse
 
-from LSpider.settings import CHROME_WEBDRIVER_PATH
+from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY
 from utils.base import random_string
 from utils.log import logger
 
@@ -49,8 +49,23 @@ class ChromeDriver:
         self.chrome_options = webdriver.ChromeOptions()
         self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--disable-gpu')
+        self.chrome_options.add_argument('--ignore-certificate-errors')
 
-        self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path)
+        # proxy
+        desired_capabilities = self.chrome_options.to_capabilities()
+        desired_capabilities['acceptSslCerts'] = True
+        desired_capabilities['acceptInsecureCerts'] = True
+        desired_capabilities['proxy'] = {
+            "httpProxy": CHROME_PROXY,
+            "ftpProxy": CHROME_PROXY,
+            "sslProxy": CHROME_PROXY,
+            "noProxy": None,
+            "proxyType": "MANUAL",
+            "class": "org.openqa.selenium.Proxy",
+            "autodetect": False,
+        }
+
+        self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path, desired_capabilities=desired_capabilities)
 
         self.driver.set_page_load_timeout(15)
         self.driver.set_script_timeout(5)
@@ -69,7 +84,7 @@ class ChromeDriver:
             if times > 0:
                 return False
 
-            logger.warning("[ChromeHeadless]repeat once..{}".format(url))
+            logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, times+1)
             return False
 

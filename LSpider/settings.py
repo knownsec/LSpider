@@ -183,3 +183,10 @@ RABBITMQ_PORT = "1456"
 RABBITMQ_USERNAME = "lspider"
 RABBITMQ_PASSWORD = "lspiderrabbit123"
 RABBITMQ_VHOST = "lspider"
+
+# wheather open rabbitmq
+IS_OPEN_RABBITMQ = False
+
+# proxy for chrome headless
+IS_OPEN_CHROME_PROXY = True
+CHROME_PROXY = '127.0.0.1:7777'

@@ -13,6 +13,7 @@ import datetime
 import traceback
 from queue import Queue, Empty
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 from utils.LReq import LReq
 from utils.log import logger
@@ -22,10 +23,12 @@ from core.urlparser import url_parser
 from core.threadingpool import ThreadPool
 from core.rabbitmqhandler import RabbitmqHandler
 
-from LSpider.settings import LIMIT_DEEP
+from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ
 
-from web.spider.models import UrlTable
+from web.spider.models import UrlTable, SubDomainList
 from web.index.models import ScanTask
+
+from web.spider.controller.prescan import PrescanCore
 
 
 class SpiderCoreBackend:
@@ -55,6 +58,29 @@ class SpiderCoreBackend:
                     task.last_scan_time = nowtime
                     task.save()
 
+            # subdomain scan
+            domain = urlparse(task.target).netloc
+
+            if domain:
+                PrescanCore().start(domain)
+
+        SubDomainlist = SubDomainList.objects.filter()
+
+        for subdomain in SubDomainlist:
+            lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
+            nowtime = datetime.datetime.now()
+
+            if lastscantime:
+                if (nowtime - lastscantime).days > 30:
+                    # 1 mouth
+                    target = subdomain.subdomain
+
+                    self.target_list.put({'url': target, 'type': 'link', 'deep': 0})
+
+                    # 重设扫描时间
+                    subdomain.lastscan = nowtime
+                    subdomain.save()
+
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续
         for i in range(self.threadpool.get_free_num()):
@@ -75,12 +101,13 @@ class SpiderCore:
     def __init__(self, target_list=Queue()):
 
         # rabbitmq init
-        self.rabbitmq_handler = RabbitmqHandler()
+        if IS_OPEN_RABBITMQ:
+            self.rabbitmq_handler = RabbitmqHandler()
 
         # self.target = target
         self.target_list = target_list
 
-        self.req = LReq()
+        self.req = LReq(is_chrome=True)
 
     def scan(self):
         i = 0
@@ -110,7 +137,8 @@ class SpiderCore:
                 for target in result_list:
 
                     # save to rabbitmq
-                    self.rabbitmq_handler.new_scan_target(str(target))
+                    if IS_OPEN_RABBITMQ:
+                        self.rabbitmq_handler.new_scan_target(str(target))
 
                     if target['deep'] > LIMIT_DEEP:
                         continue

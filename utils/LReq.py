@@ -12,6 +12,7 @@ import json
 import requests
 import random
 import traceback
+from urllib.parse import urlparse
 
 from utils.log import logger
 from core.chromeheadless import ChromeDriver
@@ -21,14 +22,16 @@ class LReq:
     """
     请求类
     """
-    def __init__(self):
+    def __init__(self, is_chrome=False):
 
         self.ua = ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/538",
                    "Mozilla/5.0 (iPad; U; CPU OS 3_2_1 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7B405",
                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0"]
 
         self.s = requests.Session()
-        self.cs = ChromeDriver()
+
+        if is_chrome:
+            self.cs = ChromeDriver()
 
     @staticmethod
     def get_timeout():
@@ -44,8 +47,12 @@ class LReq:
         if url == "javascript:void(0);":
             return None
 
-        if not url.startswith("http"):
-            url = "http://" + url
+        if not urlparse(url).scheme:
+
+            if not urlparse(url).netloc:
+                return url
+
+            url = 'http://' + url
 
         return url
 
@@ -100,7 +107,7 @@ class LReq:
 
 
 if __name__ == "__main__":
-    Req = LReq()
+    Req = LReq(is_chrome=True)
 
     # print(Req.getResp("https://lorexxar.cn"))
     print(Req.getResp("https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"))
