@@ -60,38 +60,42 @@ class LReq:
         return url
 
     def getResp(self, url):
+        logger.info("[LReq] New request {}".format(url))
         url = self.check_url(url)
 
         try:
             r = self.s.get(url, headers=self.get_header(), timeout=3)
         except:
-            logger.warning('[AST] something error, {}'.format(traceback.format_exc()))
+            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
             return False
 
         return r.content
 
     def getRespByChrome(self, url):
+        logger.info("[LReq] New request {}".format(url))
         url = self.check_url(url)
 
         try:
             return self.cs.get_resp(url)
 
         except:
-            logger.warning('[AST] something error, {}'.format(traceback.format_exc()))
+            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
             return False
 
     def postResp(self, url, data):
+        logger.info("[LReq] New request {}".format(url))
         url = self.check_url(url)
 
         try:
             r = self.s.post(url, data=data, headers=self.get_header(), timeout=3)
         except:
-            logger.warning('[AST] something error, {}'.format(traceback.format_exc()))
+            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
             return False
 
         return r.content
 
     def postJsonResp(self, url, data):
+        logger.info("[LReq] New request {}".format(url))
         url = self.check_url(url)
 
         header = self.get_header()
@@ -100,7 +104,7 @@ class LReq:
         try:
             r = self.s.post(url, data=json.dumps(data), headers=header, timeout=3)
         except:
-            logger.warning('[AST] something error, {}'.format(traceback.format_exc()))
+            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
             return False
 
         return r.content
