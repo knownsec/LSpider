@@ -9,7 +9,7 @@
 '''
 
 import re
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urljoin
 
 from web.spider.models import SubDomainList, UrlTable
 from web.index.models import BanList
@@ -65,7 +65,14 @@ def url_parser(domain, target_list, deep=0):
     for temp_result in temp_result_list:
 
         if temp_result.geturl():
-            result_list.append({'url': temp_result.geturl(), 'type': 'link', 'deep': deep + 1})
+
+            if temp_result.netloc:
+                request_url = temp_result.geturl()
+
+            else:
+                request_url = urljoin(domain, temp_result.path)
+
+            result_list.append({'url': request_url, 'type': 'link', 'deep': deep + 1})
 
             if temp_result.netloc == "":
                 target_domain = origin_domain
