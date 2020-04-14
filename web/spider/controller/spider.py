@@ -85,6 +85,11 @@ class SpiderCoreBackend:
                     subdomain.lastscan = nowtime
                     subdomain.save()
 
+        # 如果队列为空，那么直接跳出
+        if self.target_list.empty():
+            logger.info("[Spider Core] Spider Target Queue is empty.")
+            return
+
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续
         for i in range(self.threadpool.get_free_num()):
