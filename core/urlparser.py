@@ -15,6 +15,7 @@ from web.spider.models import SubDomainList, UrlTable
 from web.index.models import BanList
 
 from utils.log import logger
+from utils.base import get_now_scan_id
 
 
 def checkbanlist(domain):
@@ -80,7 +81,12 @@ def url_parser(domain, target_list, deep=0):
                 target_domain = temp_result.netloc
 
             # save data
-            u1 = UrlTable(domain=target_domain, type='link', url=temp_result.geturl())
+            # check exist
+            url = UrlTable.objects.filter(domain=target_domain, url=temp_result.geturl())
+            if url:
+                continue
+
+            u1 = UrlTable(domain=target_domain, type='link', url=temp_result.geturl(), scanid=get_now_scan_id())
             u1.save()
 
     return result_list
@@ -94,8 +100,16 @@ def url_filter(target_list):
 
     for domain in target_list:
         temp_list = {}
+        domain_list = target_list[domain]
 
-        for target in target_list[domain]:
+        # 读数据库数据做聚合分析
+        database_urllist = UrlTable.objects.filter(domain=domain, scanid=get_now_scan_id())
+
+        for url in database_urllist:
+            domain_list.append(urlparse(url.url))
+
+        print(domain_list)
+        for target in domain_list:
 
             # 路径重复判定处理
             path_parsers = target.path.split('/')
@@ -137,7 +151,7 @@ def check_same(flag, origin_target_list, new_target):
     """
 
     check_flag = True
-    BANWORD_LAST_LIST = ['.html', '.htm', '.png', '.jpg', '.mp']
+    BANWORD_LAST_LIST = ['.htm', '.png', '.jpg', '.mp']
 
     for origin_target in origin_target_list:
 

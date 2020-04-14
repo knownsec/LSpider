@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 
 from utils.LReq import LReq
 from utils.log import logger
+from utils.base import get_new_scan_id, get_now_scan_id
 
 from core.htmlparser import html_parser
 from core.urlparser import url_parser
@@ -39,6 +40,9 @@ class SpiderCoreBackend:
         # 任务与线程分发
         self.target_list = Queue()
         self.threadpool = ThreadPool()
+        self.scan_id = get_new_scan_id()
+
+        logger.info("[Spider Main] Spider id {} Start.".format(self.scan_id))
 
         tasklist = ScanTask.objects.filter(is_active=True)
 
@@ -108,6 +112,7 @@ class SpiderCore:
         self.target_list = target_list
 
         self.req = LReq(is_chrome=True)
+        self.scan_id = get_now_scan_id()
 
     def scan(self):
         i = 0

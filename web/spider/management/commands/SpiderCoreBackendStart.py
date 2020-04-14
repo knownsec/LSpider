@@ -19,6 +19,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        logger.info("[Spider Main] Spider Start.")
         SpiderCoreBackend()
         logger.info("[Spider Main] Spider finish.")

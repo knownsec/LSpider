@@ -19,3 +19,8 @@ class UrlTable(models.Model):
     domain = models.CharField(max_length=50)
     type = models.CharField(max_length=10, default='link')
     url = models.CharField(max_length=500)
+    scanid = models.IntegerField(default=0)
+
+
+class ScanTable(models.Model):
+    scantime = models.DateTimeField(auto_now=True)

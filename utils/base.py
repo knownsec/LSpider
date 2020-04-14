@@ -10,6 +10,8 @@
 
 import random
 
+from web.spider.models import ScanTable
+
 
 def random_string(length=8):
     seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+=-"
@@ -36,3 +38,13 @@ def reg_trim(data):
 
     return result
 
+
+def get_new_scan_id():
+    s1 = ScanTable()
+    s1.save()
+    return s1.id
+
+
+def get_now_scan_id():
+    s1 = ScanTable.objects.last()
+    return s1.id
