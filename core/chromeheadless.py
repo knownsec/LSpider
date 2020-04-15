@@ -162,12 +162,30 @@ class ChromeDriver:
 
         try:
             inputs = self.driver.find_elements_by_tag_name('input')
+            input_lens = len(inputs)
 
             if not inputs:
                 return
 
-            for input in inputs:
-                input.send_keys(random_string())
+            for i in range(input_lens):
+                try:
+                    input = inputs[i]
+
+                    input.send_keys(random_string())
+
+                except selenium.common.exceptions.ElementNotInteractableException:
+                    logger.warning("[ChromeHeadless][Click button] error interact")
+
+                    if self.check_back():
+                        inputs = self.driver.find_elements_by_tag_name('input')
+                    continue
+
+                except selenium.common.exceptions.StaleElementReferenceException:
+                    logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
+
+                    self.get_resp(self.origin_url, 1)
+                    inputs = self.driver.find_elements_by_tag_name('input')
+                    continue
 
             submit = self.driver.find_element_by_xpath("//input[@type='submit']")
             submit.click()

@@ -160,6 +160,7 @@ def check_same(flag, origin_target_list, new_target):
         # false 是相似 true 是不想似
         check_flag_one = False
         is_diff_last = False
+        is_has_banword = False
 
         origin_path = origin_target.path.split('/')
         new_target_path = new_target.path.split('/')
@@ -180,6 +181,7 @@ def check_same(flag, origin_target_list, new_target):
                         for banword in BANWORD_LAST_LIST:
                             if banword in origin_path[-1]:
                                 check_flag_one = False
+                                is_has_banword = True
                                 break
 
                     # 如果不同的不是最后一部分，那么必须要更多不同才行
@@ -191,7 +193,7 @@ def check_same(flag, origin_target_list, new_target):
             i += 1
 
         # 如果最后一部分相同且不存在特殊字符
-        if new_target_path[-1] == origin_path[-1] and not check_flag_one:
+        if new_target_path[-1] == origin_path[-1] and not check_flag_one and not is_has_banword:
             is_diff_last = True
 
         # 参数重复判定
