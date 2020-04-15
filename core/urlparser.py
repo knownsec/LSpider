@@ -108,7 +108,6 @@ def url_filter(target_list):
         for url in database_urllist:
             domain_list.append(urlparse(url.url))
 
-        print(domain_list)
         for target in domain_list:
 
             # 路径重复判定处理
@@ -160,6 +159,7 @@ def check_same(flag, origin_target_list, new_target):
 
         # false 是相似 true 是不想似
         check_flag_one = False
+        is_diff_last = False
 
         origin_path = origin_target.path.split('/')
         new_target_path = new_target.path.split('/')
@@ -182,6 +182,8 @@ def check_same(flag, origin_target_list, new_target):
                                 check_flag_one = False
                                 break
 
+                        is_diff_last = True
+
                     # 如果不同的不是最后一部分，那么必须要更多不同才行
                     diff += 1
 
@@ -191,7 +193,7 @@ def check_same(flag, origin_target_list, new_target):
             i += 1
 
         # 参数重复判定
-        if not check_flag_one:
+        if not check_flag_one or is_diff_last:
             # 如果path判定相似，那么会进入参数重复判定
             origin_query = parse_qs(origin_target.query)
             new_target_query = parse_qs(new_target.query)

@@ -86,7 +86,7 @@ class ChromeDriver:
 
             self.driver.get(url)
             self.driver.implicitly_wait(10)
-            # self.click_page()
+            self.click_page()
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
@@ -108,51 +108,97 @@ class ChromeDriver:
         self.click_link()
         self.click_button()
 
+    def check_back(self):
+        if self.check_host():
+            new_url = self.driver.current_url
+            self.driver.back()
+            return True
+        return False
+
     def click_link(self):
-        self.driver.refresh()
+        """
+        遇到一个问题，如果页面变化，那么获取到的标签hook会丢失，这里我们尝试用计数器来做
+        """
 
         links = self.driver.find_elements_by_tag_name('a')
+        links_len = len(links)
 
-        for link in links:
+        for i in range(links_len):
 
             try:
+                link = links[i]
+
                 href = link.get_attribute('href')
 
                 if href.startswith('#'):
                     link.click()
 
-                    if self.check_host():
-                        new_url = self.driver.current_url
-                        self.driver.back()
+                    self.check_back()
 
                 if href == "javascript:void(0);":
                     link.click()
 
-                    if self.check_host():
-                        new_url = self.driver.current_url
-                        self.driver.back()
+                    self.check_back()
 
             except selenium.common.exceptions.ElementNotInteractableException:
                 logger.warning("[ChromeHeadless][Click Page] error interact")
-                break
+
+                self.check_back()
+                links = self.driver.find_elements_by_tag_name('a')
+                continue
 
             except selenium.common.exceptions.StaleElementReferenceException:
                 logger.warning("[ChromeHeadless][Click Page] page reload or wrong back redirect")
-                break
+
+                self.get_resp(self.origin_url, 1)
+                links = self.driver.find_elements_by_tag_name('a')
+                continue
+
+            except selenium.common.exceptions.NoSuchElementException:
+                logger.warning("[ChromeHeadless][Click Page] No Such Element")
+                return
 
     def click_button(self):
 
         try:
             inputs = self.driver.find_elements_by_tag_name('input')
 
+            if not inputs:
+                return
+
             for input in inputs:
                 input.send_keys(random_string())
 
             submit = self.driver.find_element_by_xpath("//input[@type='submit']")
-            submit2 = self.driver.find_element_by_tag_name('button')
-
             submit.click()
-            submit2.click()
+
+            buttons = self.driver.find_elements_by_tag_name('button')
+            buttons_len = len(buttons)
+
+            for i in range(buttons_len):
+
+                try:
+
+                    button = buttons[i]
+                    button.click()
+
+                    if self.check_back():
+                        buttons = self.driver.find_elements_by_tag_name('button')
+
+                except selenium.common.exceptions.ElementNotInteractableException:
+                    logger.warning("[ChromeHeadless][Click button] error interact")
+
+                    if self.check_back():
+                        buttons = self.driver.find_elements_by_tag_name('button')
+                    continue
+
+                except selenium.common.exceptions.StaleElementReferenceException:
+                    logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
+
+                    self.get_resp(self.origin_url, 1)
+                    buttons = self.driver.find_elements_by_tag_name('button')
+                    continue
+
         except selenium.common.exceptions.NoSuchElementException:
             logger.warning("[ChromeHeadless][Click Page] No Such Element")
             return
