@@ -19,6 +19,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 
 import os
+import traceback
 from urllib.parse import urlparse
 
 from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY
@@ -99,6 +100,7 @@ class ChromeDriver:
 
         except selenium.common.exceptions.InvalidArgumentException:
             logger.warning("[ChromeHeadless]Request error...{}".format(url))
+            logger.warning("[ChromeHeadless]{}".format(traceback.format_exc()))
             return False
 
         return self.driver.page_source
@@ -129,6 +131,9 @@ class ChromeDriver:
                 link = links[i]
 
                 href = link.get_attribute('href')
+
+                if not href:
+                    continue
 
                 if href.startswith('#'):
                     link.click()
