@@ -182,8 +182,6 @@ def check_same(flag, origin_target_list, new_target):
                                 check_flag_one = False
                                 break
 
-                        is_diff_last = True
-
                     # 如果不同的不是最后一部分，那么必须要更多不同才行
                     diff += 1
 
@@ -192,8 +190,12 @@ def check_same(flag, origin_target_list, new_target):
 
             i += 1
 
+        # 如果最后一部分相同且不存在特殊字符
+        if new_target_path[-1] == origin_path[-1] and not check_flag_one:
+            is_diff_last = True
+
         # 参数重复判定
-        if not check_flag_one or is_diff_last:
+        if not check_flag_one and is_diff_last:
             # 如果path判定相似，那么会进入参数重复判定
             origin_query = parse_qs(origin_target.query)
             new_target_query = parse_qs(new_target.query)
