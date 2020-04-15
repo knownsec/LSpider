@@ -49,10 +49,14 @@ class LReq:
 
         if not urlparse(url).scheme:
 
-            if not urlparse(url).netloc:
+            if url.startswith('//'):
+                url = 'http:' + url
                 return url
 
-            if url.startswith('//'):
+            if url.startswith('/'):
+                return url
+
+            if not urlparse(url).netloc:
                 return url
 
             url = 'http://' + url

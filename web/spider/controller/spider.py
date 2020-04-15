@@ -76,7 +76,7 @@ class SpiderCoreBackend:
                     # 1 mouth
                     target = subdomain.subdomain
 
-                    self.target_list.put({'url': target, 'type': 'link', 'deep': 0})
+                    self.target_list.put({'url': "http://"+target, 'type': 'link', 'deep': 0})
 
                     # 重设扫描时间
                     subdomain.lastscan = nowtime
