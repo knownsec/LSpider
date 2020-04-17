@@ -37,9 +37,10 @@ class LReq:
     def get_timeout():
         return random.randint(1, 5) * 0.5
 
-    def get_header(self):
+    def get_header(self, cookies=None):
         return {
-            "User-Agent": random.choice(self.ua)
+            "User-Agent": random.choice(self.ua),
+            "Cookie": cookies
         }
 
     def check_url(self, url):
@@ -63,30 +64,30 @@ class LReq:
 
         return url
 
-    def getResp(self, url):
+    def getResp(self, url, cookies):
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 
         try:
-            r = self.s.get(url, headers=self.get_header(), timeout=3)
+            r = self.s.get(url, headers=self.get_header(cookies), timeout=3)
         except:
             logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
             return False
 
         return r.content
 
-    def getRespByChrome(self, url):
+    def getRespByChrome(self, url, cookies):
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 
         try:
-            return self.cs.get_resp(url)
+            return self.cs.get_resp(url, cookies)
 
         except:
             logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
             return False
 
-    def postResp(self, url, data):
+    def postResp(self, url, data, cookies):
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 
@@ -98,7 +99,7 @@ class LReq:
 
         return r.content
 
-    def postJsonResp(self, url, data):
+    def postJsonResp(self, url, data, cookies):
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 

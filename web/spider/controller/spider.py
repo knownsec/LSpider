@@ -53,10 +53,11 @@ class SpiderCoreBackend:
                     # 1 mouth
                     targets = check_target(task.target)
                     target_type = task.target_type
+                    target_cookies = task.cookies
 
                     for target in targets:
 
-                        self.target_list.put({'url': target, 'type': target_type, 'deep': 0})
+                        self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
 
                     # 重设扫描时间
                     task.last_scan_time = nowtime
@@ -79,7 +80,7 @@ class SpiderCoreBackend:
                     # 1 mouth
                     target = subdomain.subdomain
 
-                    self.target_list.put({'url': "http://"+target, 'type': 'link', 'deep': 0})
+                    self.target_list.put({'url': "http://"+target, 'type': 'link', 'cookies': "", 'deep': 0})
 
                     # 重设扫描时间
                     subdomain.lastscan = nowtime
@@ -136,10 +137,10 @@ class SpiderCore:
                 content = False
 
                 if target['type'] == 'link':
-                    content = self.req.getRespByChrome(target['url'])
+                    content = self.req.getRespByChrome(target['url'], target['cookies'])
 
                 if target['type'] == 'js':
-                    content = self.req.getResp(target['url'])
+                    content = self.req.getResp(target['url'], target['cookies'])
 
                 if not content:
                     continue

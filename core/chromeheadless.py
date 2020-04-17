@@ -75,15 +75,19 @@ class ChromeDriver:
             "autodetect": False,
         }
 
+        self.chrome_options.add_argument('user-agent="Mozilla/5.0 (iPod; U; CPU iPhone OS 2_1 like Mac OS X; ja-jp) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5F137 Safari/525.20"')
+
         self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path, desired_capabilities=desired_capabilities)
 
         self.driver.set_page_load_timeout(15)
         self.driver.set_script_timeout(5)
 
-    def get_resp(self, url, times=0):
+    def get_resp(self, url, cookies=None, times=0):
 
         try:
             self.origin_url = url
+
+            self.driver.add_cookie(self.check_cookie(cookies))
 
             self.driver.get(url)
             self.driver.implicitly_wait(10)
@@ -95,7 +99,7 @@ class ChromeDriver:
                 return False
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
-            self.get_resp(url, times+1)
+            self.get_resp(url, cookies, times+1)
             return False
 
         except selenium.common.exceptions.InvalidArgumentException:
@@ -104,6 +108,17 @@ class ChromeDriver:
             return False
 
         return self.driver.page_source
+
+    def check_cookie(self, cookies):
+        result = {}
+
+        for cookie in cookies.split(';'):
+            key = cookie.split('=')[0]
+            value = cookie.split('=')[1]
+
+            result[key] = value
+
+        return result
 
     def click_page(self):
 
@@ -155,7 +170,7 @@ class ChromeDriver:
             except selenium.common.exceptions.StaleElementReferenceException:
                 logger.warning("[ChromeHeadless][Click Page] page reload or wrong back redirect")
 
-                self.get_resp(self.origin_url, 1)
+                self.get_resp(self.origin_url, "", 1)
                 links = self.driver.find_elements_by_tag_name('a')
                 continue
 
@@ -188,7 +203,7 @@ class ChromeDriver:
                 except selenium.common.exceptions.StaleElementReferenceException:
                     logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
 
-                    self.get_resp(self.origin_url, 1)
+                    self.get_resp(self.origin_url, "", 1)
                     inputs = self.driver.find_elements_by_tag_name('input')
                     continue
 
@@ -218,7 +233,7 @@ class ChromeDriver:
                 except selenium.common.exceptions.StaleElementReferenceException:
                     logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
 
-                    self.get_resp(self.origin_url, 1)
+                    self.get_resp(self.origin_url, "", 1)
                     buttons = self.driver.find_elements_by_tag_name('button')
                     continue
 
