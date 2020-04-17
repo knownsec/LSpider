@@ -18,6 +18,7 @@ from urllib.parse import urlparse
 from utils.LReq import LReq
 from utils.log import logger
 from utils.base import get_new_scan_id, get_now_scan_id
+from utils.base import check_target
 
 from core.htmlparser import html_parser
 from core.urlparser import url_parser
@@ -50,10 +51,12 @@ class SpiderCoreBackend:
             if lastscantime:
                 if (nowtime - lastscantime).days > 30:
                     # 1 mouth
-                    target = task.target
+                    targets = check_target(task.target)
                     target_type = task.target_type
 
-                    self.target_list.put({'url': target, 'type': target_type, 'deep': 0})
+                    for target in targets:
+
+                        self.target_list.put({'url': target, 'type': target_type, 'deep': 0})
 
                     # 重设扫描时间
                     task.last_scan_time = nowtime

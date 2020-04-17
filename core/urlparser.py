@@ -82,11 +82,11 @@ def url_parser(domain, target_list, deep=0):
 
             # save data
             # check exist
-            url = UrlTable.objects.filter(domain=target_domain, url=temp_result.geturl())
+            url = UrlTable.objects.filter(domain=target_domain, url=request_url)
             if url:
                 continue
 
-            u1 = UrlTable(domain=target_domain, type='link', url=temp_result.geturl(), scanid=get_now_scan_id())
+            u1 = UrlTable(domain=target_domain, type='link', url=request_url, scanid=get_now_scan_id())
             u1.save()
 
     return result_list

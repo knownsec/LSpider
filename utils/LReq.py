@@ -53,7 +53,7 @@ class LReq:
                 url = 'http:' + url
                 return url
 
-            if url.startswith('/'):
+            if url.startswith('/') or url.startswith('.'):
                 return url
 
             if not urlparse(url).netloc:

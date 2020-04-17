@@ -48,3 +48,22 @@ def get_new_scan_id():
 def get_now_scan_id():
     s1 = ScanTable.objects.last()
     return s1.id
+
+
+def check_target(target_list):
+    result = []
+
+    if ',' in target_list:
+        for target in target_list.split(','):
+            if target:
+                result.append(target.strip())
+
+    elif '\n' in target_list:
+        for target in target_list.split('\n'):
+            if target:
+                result.append(target.strip())
+
+    else:
+        result = [target_list]
+
+    return result
