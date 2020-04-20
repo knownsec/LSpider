@@ -15,6 +15,7 @@ import os
 import logging
 import colorlog
 import time
+import datetime
 
 # stream handle
 #
@@ -48,10 +49,12 @@ def log(loglevel, log_name):
     logger.addHandler(handler)
     logger.setLevel(loglevel)
 
+
 if os.path.isdir(log_path) is not True:
     os.mkdir(log_path, 0o755)
 
-logfile = os.path.join(log_path, str(time.time())+'.log')
+day_time = int(time.mktime(datetime.date.today().timetuple()))
+logfile = os.path.join(log_path, str(day_time)+'.log')
 
 # log
 log(logging.INFO, logfile)

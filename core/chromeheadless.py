@@ -174,6 +174,10 @@ class ChromeDriver:
                 links = self.driver.find_elements_by_tag_name('a')
                 continue
 
+            except IndexError:
+                logger.warning("[ChromeHeadless][Click Page] wrong index for link")
+                continue
+
             except selenium.common.exceptions.NoSuchElementException:
                 logger.warning("[ChromeHeadless][Click Page] No Such Element")
                 return
@@ -207,6 +211,10 @@ class ChromeDriver:
                     inputs = self.driver.find_elements_by_tag_name('input')
                     continue
 
+                except IndexError:
+                    logger.warning("[ChromeHeadless][Click button] wrong index for button")
+                    continue
+
             submit = self.driver.find_element_by_xpath("//input[@type='submit']")
             submit.click()
 
@@ -235,6 +243,10 @@ class ChromeDriver:
 
                     self.get_resp(self.origin_url, "", 1)
                     buttons = self.driver.find_elements_by_tag_name('button')
+                    continue
+
+                except IndexError:
+                    logger.warning("[ChromeHeadless][Click button] wrong index for button")
                     continue
 
         except selenium.common.exceptions.NoSuchElementException:
