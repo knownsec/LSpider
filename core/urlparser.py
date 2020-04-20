@@ -73,7 +73,7 @@ def url_parser(domain, target_list, deep=0):
             else:
                 request_url = urljoin(domain, temp_result.path)
 
-            result_list.append({'url': request_url, 'type': 'link', 'deep': deep + 1})
+            result_list.append({'url': request_url, 'type': 'link', 'cookies': '', 'deep': deep + 1})
 
             if temp_result.netloc == "":
                 target_domain = origin_domain
