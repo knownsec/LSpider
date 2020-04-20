@@ -88,11 +88,20 @@ class ChromeDriver:
             self.origin_url = url
 
             self.driver.get(url)
+            self.driver.implicitly_wait(10)
+
             if cookies:
                 self.add_cookie(cookies)
                 self.driver.get(url)
+                self.driver.implicitly_wait(10)
 
+            self.click_page()
+
+        except selenium.common.exceptions.UnableToSetCookieException:
+            logger.warning("[ChromeHeadless] Wrong Cookie set, Maybe request error")
+            self.driver.get(url)
             self.driver.implicitly_wait(10)
+
             self.click_page()
 
         except selenium.common.exceptions.TimeoutException:
