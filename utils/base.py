@@ -64,7 +64,7 @@ def check_target(target_list):
     elif '\n' in target_list:
         for target in target_list.split('\n'):
             if target:
-                if target.strip().startswith("http://"):
+                if target.strip().startswith("http://") or target.strip().startswith("https://"):
                     result.append(target.strip())
                 else:
                     result.append('http://' + target.strip())
