@@ -87,7 +87,8 @@ class ChromeDriver:
         try:
             self.origin_url = url
 
-            self.driver.add_cookie(self.check_cookie(cookies))
+            if cookies:
+                self.driver.add_cookie(self.check_cookie(cookies))
 
             self.driver.get(url)
             self.driver.implicitly_wait(10)
