@@ -56,14 +56,23 @@ def check_target(target_list):
     if ',' in target_list:
         for target in target_list.split(','):
             if target:
-                result.append(target.strip())
+                if target.strip().startswith("http://"):
+                    result.append(target.strip())
+                else:
+                    result.append('http://'+target.strip())
 
     elif '\n' in target_list:
         for target in target_list.split('\n'):
             if target:
-                result.append(target.strip())
+                if target.strip().startswith("http://"):
+                    result.append(target.strip())
+                else:
+                    result.append('http://' + target.strip())
 
     else:
-        result = [target_list]
+        if target_list.strip().startswith("http://"):
+            result = [target_list]
+        else:
+            result = ['http://' + target_list]
 
     return result

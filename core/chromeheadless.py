@@ -88,7 +88,7 @@ class ChromeDriver:
             self.origin_url = url
 
             if cookies:
-                self.driver.add_cookie(self.check_cookie(cookies))
+                self.add_cookie(cookies)
 
             self.driver.get(url)
             self.driver.implicitly_wait(10)
@@ -110,17 +110,14 @@ class ChromeDriver:
 
         return self.driver.page_source
 
-    def check_cookie(self, cookies):
-        result = {}
+    def add_cookie(self, cookies):
 
         for cookie in cookies.split(';'):
             key = cookie.split('=')[0]
             value = cookie.split('=')[1]
 
             if key and value:
-                result[key] = value
-
-        return result
+                self.driver.add_cookie({'name': key, 'value': value})
 
     def click_page(self):
 
