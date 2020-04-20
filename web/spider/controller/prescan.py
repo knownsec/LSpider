@@ -42,7 +42,10 @@ class PrescanCore:
     def start(self, domain):
         for pluginObj in self.pluginObj_list:
 
-            self.result_list.extend(pluginObj.query(domain))
+            subdomain_list = pluginObj.query(domain)
+
+            if subdomain_list:
+                self.result_list.extend(subdomain_list)
 
             # 去重
             self.result_list = list(set(self.result_list))
