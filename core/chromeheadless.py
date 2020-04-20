@@ -117,7 +117,8 @@ class ChromeDriver:
             key = cookie.split('=')[0]
             value = cookie.split('=')[1]
 
-            result[key] = value
+            if key and value:
+                result[key] = value
 
         return result
 
