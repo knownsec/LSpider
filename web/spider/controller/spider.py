@@ -59,15 +59,15 @@ class SpiderCoreBackend:
 
                         self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
 
+                        # subdomain scan
+                        domain = urlparse(target).netloc
+
+                        if domain:
+                            PrescanCore().start(domain)
+
                     # 重设扫描时间
                     task.last_scan_time = nowtime
                     task.save()
-
-            # subdomain scan
-            domain = urlparse(task.target).netloc
-
-            if domain:
-                PrescanCore().start(domain)
 
         SubDomainlist = SubDomainList.objects.filter()
 
@@ -137,10 +137,10 @@ class SpiderCore:
                 content = False
 
                 if target['type'] == 'link':
-                    content = self.req.getRespByChrome(target['url'], target['cookies'])
+                    content = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
                 if target['type'] == 'js':
-                    content = self.req.getResp(target['url'], target['cookies'])
+                    content = self.req.get(target['url'], 'Resp', 0, target['cookies'])
 
                 if not content:
                     continue

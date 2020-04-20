@@ -26,7 +26,7 @@ class CrtScan:
     def query(self, domain, deep=0):
 
         try:
-            content = self.req.getResp(self.url+domain)
+            content = self.req.get(self.url+domain)
 
         except requests.exceptions.ReadTimeout:
 

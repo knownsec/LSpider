@@ -12,6 +12,7 @@ import json
 import requests
 import random
 import traceback
+import socket
 from urllib.parse import urlparse
 
 from utils.log import logger
@@ -64,15 +65,59 @@ class LReq:
 
         return url
 
+    def get(self, url, type='Resp', time=0, *args):
+
+        try:
+            method = getattr(self, 'get'+type)
+            return method(url, args)
+
+        except requests.exceptions.ReadTimeout:
+            logger.warning("[LReq] Request {} timeout...".format(url))
+            if time > 0:
+                return False
+            logger.warning("[LReq] Retry Request {} once...".format(url))
+            return self.get(url, type, time=1, *args)
+
+        except socket.timeout:
+            logger.warning("[LReq] Request {} timeout...".format(url))
+            if time > 0:
+                return False
+            logger.warning("[LReq] Retry Request {} once...".format(url))
+            return self.get(url, type, time=1, *args)
+
+        except:
+            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
+            return False
+
+    def post(self, url, type='Resp', time=0, *args):
+
+        try:
+            method = getattr(self, 'post'+type)
+            return method(url, args)
+
+        except requests.exceptions.ReadTimeout:
+            logger.warning("[LReq] Request {} timeout...".format(url))
+            if time > 0:
+                return False
+            logger.warning("[LReq] Retry Request {} once...".format(url))
+            return self.post(url, type, time=1, *args)
+
+        except socket.timeout:
+            logger.warning("[LReq] Request {} timeout...".format(url))
+            if time > 0:
+                return False
+            logger.warning("[LReq] Retry Request {} once...".format(url))
+            return self.post(url, type, time=1, *args)
+
+        except:
+            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
+            return False
+
     def getResp(self, url, cookies):
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 
-        try:
-            r = self.s.get(url, headers=self.get_header(cookies), timeout=3)
-        except:
-            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
-            return False
+        r = self.s.get(url, headers=self.get_header(cookies), timeout=3)
 
         return r.content
 
@@ -80,22 +125,13 @@ class LReq:
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 
-        try:
-            return self.cs.get_resp(url, cookies)
-
-        except:
-            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
-            return False
+        return self.cs.get_resp(url, cookies)
 
     def postResp(self, url, data, cookies):
         url = self.check_url(url)
         logger.info("[LReq] New request {}".format(url))
 
-        try:
-            r = self.s.post(url, data=data, headers=self.get_header(), timeout=3)
-        except:
-            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
-            return False
+        r = self.s.post(url, data=data, headers=self.get_header(), timeout=3)
 
         return r.content
 
@@ -106,11 +142,7 @@ class LReq:
         header = self.get_header()
         header['Content-Type'] = 'application/json'
 
-        try:
-            r = self.s.post(url, data=json.dumps(data), headers=header, timeout=3)
-        except:
-            logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
-            return False
+        r = self.s.post(url, data=json.dumps(data), headers=header, timeout=3)
 
         return r.content
 
