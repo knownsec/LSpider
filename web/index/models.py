@@ -7,7 +7,7 @@ from django.utils import timezone
 
 class ScanTask(models.Model):
     task_name = models.CharField(max_length=50)
-    target = models.CharField(max_length=500)
+    target = models.CharField(max_length=2000)
     target_type = models.CharField(max_length=30, default='link')
     task_tag = models.CharField(max_length=100)
     last_scan_time = models.DateTimeField()
