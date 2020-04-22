@@ -22,7 +22,7 @@ import os
 import traceback
 from urllib.parse import urlparse
 
-from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY
+from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY, IS_OPEN_CHROME_PROXY
 from utils.base import random_string
 from utils.log import logger
 
@@ -57,32 +57,34 @@ class ChromeDriver:
     def init_object(self):
 
         self.chrome_options = webdriver.ChromeOptions()
-        self.chrome_options.add_argument('--headless')
+        # self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_argument('--ignore-certificate-errors')
 
         # proxy
         desired_capabilities = self.chrome_options.to_capabilities()
-        desired_capabilities['acceptSslCerts'] = True
-        desired_capabilities['acceptInsecureCerts'] = True
-        desired_capabilities['proxy'] = {
-            "httpProxy": CHROME_PROXY,
-            "ftpProxy": CHROME_PROXY,
-            "sslProxy": CHROME_PROXY,
-            "noProxy": None,
-            "proxyType": "MANUAL",
-            "class": "org.openqa.selenium.Proxy",
-            "autodetect": False,
-        }
+        if IS_OPEN_CHROME_PROXY:
 
-        self.chrome_options.add_argument('user-agent="Mozilla/5.0 (iPod; U; CPU iPhone OS 2_1 like Mac OS X; ja-jp) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5F137 Safari/525.20"')
+            desired_capabilities['acceptSslCerts'] = True
+            desired_capabilities['acceptInsecureCerts'] = True
+            desired_capabilities['proxy'] = {
+                "httpProxy": CHROME_PROXY,
+                "ftpProxy": CHROME_PROXY,
+                "sslProxy": CHROME_PROXY,
+                "noProxy": None,
+                "proxyType": "MANUAL",
+                "class": "org.openqa.selenium.Proxy",
+                "autodetect": False,
+            }
+
+        self.chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
 
         self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path, desired_capabilities=desired_capabilities)
 
         self.driver.set_page_load_timeout(15)
         self.driver.set_script_timeout(5)
 
-    def get_resp(self, url, cookies=None, times=0):
+    def get_resp(self, url, cookies=None, times=0, isclick=True):
 
         try:
             self.origin_url = url
@@ -95,7 +97,8 @@ class ChromeDriver:
                 self.driver.get(url)
                 self.driver.implicitly_wait(10)
 
-            self.click_page()
+            if isclick:
+                self.click_page()
 
         except selenium.common.exceptions.UnableToSetCookieException:
             logger.warning("[ChromeHeadless] Wrong Cookie set, Maybe request error")
@@ -110,7 +113,7 @@ class ChromeDriver:
                 return False
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
-            self.get_resp(url, cookies, times+1)
+            self.get_resp(url, cookies, times+1, isclick)
             return False
 
         except selenium.common.exceptions.InvalidArgumentException:
