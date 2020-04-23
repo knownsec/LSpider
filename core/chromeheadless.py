@@ -93,19 +93,14 @@ class ChromeDriver:
             self.driver.get(url)
 
             if cookies:
+                self.driver.delete_all_cookies()
                 self.add_cookie(cookies)
+
                 self.driver.implicitly_wait(10)
                 self.driver.get(url)
 
             if isclick:
                 self.click_page()
-
-        except selenium.common.exceptions.UnableToSetCookieException:
-            logger.warning("[ChromeHeadless] Wrong Cookie set, Maybe request error")
-            self.driver.get(url)
-            self.driver.implicitly_wait(10)
-
-            self.click_page()
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
@@ -130,7 +125,12 @@ class ChromeDriver:
             value = cookie.split('=')[1]
 
             if key and value:
-                self.driver.add_cookie({'name': key, 'value': value})
+                try:
+                    self.driver.add_cookie({'name': key, 'value': value})
+
+                except selenium.common.exceptions.UnableToSetCookieException:
+                    logger.warning("[ChromeHeadless] Wrong Cookie {} set..".format(key))
+                    continue
 
     def click_page(self):
 
