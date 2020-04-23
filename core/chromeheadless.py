@@ -89,13 +89,13 @@ class ChromeDriver:
         try:
             self.origin_url = url
 
-            self.driver.get(url)
             self.driver.implicitly_wait(10)
+            self.driver.get(url)
 
             if cookies:
                 self.add_cookie(cookies)
-                self.driver.get(url)
                 self.driver.implicitly_wait(10)
+                self.driver.get(url)
 
             if isclick:
                 self.click_page()
