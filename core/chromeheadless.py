@@ -88,19 +88,17 @@ class ChromeDriver:
 
         try:
             self.origin_url = url
-
-            self.driver.implicitly_wait(10)
             self.driver.get(url)
+            self.driver.implicitly_wait(10)
 
             if cookies:
-                self.driver.delete_all_cookies()
                 self.add_cookie(cookies)
-
-                self.driver.implicitly_wait(10)
                 self.driver.get(url)
 
             if isclick:
                 self.click_page()
+
+            print(self.driver.get_cookies())
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
@@ -121,8 +119,8 @@ class ChromeDriver:
     def add_cookie(self, cookies):
 
         for cookie in cookies.split(';'):
-            key = cookie.split('=')[0]
-            value = cookie.split('=')[1]
+            key = cookie.split('=')[0].strip()
+            value = cookie.split('=')[1].strip()
 
             if key and value:
                 try:
@@ -182,9 +180,8 @@ class ChromeDriver:
             except selenium.common.exceptions.StaleElementReferenceException:
                 logger.warning("[ChromeHeadless][Click Page] page reload or wrong back redirect")
 
-                self.get_resp(self.origin_url, "", 1)
-                links = self.driver.find_elements_by_tag_name('a')
-                continue
+                self.check_back()
+                return
 
             except IndexError:
                 logger.warning("[ChromeHeadless][Click Page] wrong index for link")
@@ -219,9 +216,7 @@ class ChromeDriver:
                 except selenium.common.exceptions.StaleElementReferenceException:
                     logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
 
-                    self.get_resp(self.origin_url, "", 1)
-                    inputs = self.driver.find_elements_by_tag_name('input')
-                    continue
+                    return
 
                 except IndexError:
                     logger.warning("[ChromeHeadless][Click button] wrong index for button")
@@ -253,9 +248,7 @@ class ChromeDriver:
                 except selenium.common.exceptions.StaleElementReferenceException:
                     logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
 
-                    self.get_resp(self.origin_url, "", 1)
-                    buttons = self.driver.find_elements_by_tag_name('button')
-                    continue
+                    return
 
                 except IndexError:
                     logger.warning("[ChromeHeadless][Click button] wrong index for button")

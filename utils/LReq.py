@@ -79,28 +79,28 @@ class LReq:
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.get(url, type, times=1, *args)
+            return self.get(url, type, 1, *args)
 
         except socket.timeout:
             logger.warning("[LReq] Request {} timeout...".format(url))
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.get(url, type, times=1, *args)
+            return self.get(url, type, 1, *args)
 
         except urllib3.exceptions.NewConnectionError:
             logger.warning("[LReq] Request {} error...".format(url))
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.get(url, type, times=1, *args)
+            return self.get(url, type, 1, *args)
 
         except requests.exceptions.ConnectionError:
             logger.warning("[LReq] Request {} error...".format(url))
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.get(url, type, times=1, *args)
+            return self.get(url, type, 1, *args)
 
         except urllib3.exceptions.MaxRetryError:
             logger.warning("[LReq] Request {} too more. have a wait...".format(url))
@@ -109,7 +109,7 @@ class LReq:
 
             time.sleep(3)
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.get(url, type, times=1, *args)
+            return self.get(url, type, 1, *args)
 
         except:
             logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
@@ -126,28 +126,28 @@ class LReq:
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.post(url, type, times=1, *args)
+            return self.post(url, type, 1, *args)
 
         except socket.timeout:
             logger.warning("[LReq] Request {} timeout...".format(url))
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.post(url, type, times=1, *args)
+            return self.post(url, type, 1, *args)
 
         except urllib3.exceptions.NewConnectionError:
             logger.warning("[LReq] Request {} error...".format(url))
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.post(url, type, times=1, *args)
+            return self.post(url, type, 1, *args)
 
         except requests.exceptions.ConnectionError:
             logger.warning("[LReq] Request {} error...".format(url))
             if times > 0:
                 return False
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.post(url, type, times=1, *args)
+            return self.post(url, type, 1, *args)
 
         except urllib3.exceptions.MaxRetryError:
             logger.warning("[LReq] Request {} too more. have a wait...".format(url))
@@ -156,7 +156,7 @@ class LReq:
 
             time.sleep(3)
             logger.warning("[LReq] Retry Request {} once...".format(url))
-            return self.get(url, type, times=1, *args)
+            return self.get(url, type, 1, *args)
 
         except:
             logger.warning('[LReq] something error, {}'.format(traceback.format_exc()))
