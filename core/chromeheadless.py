@@ -88,17 +88,18 @@ class ChromeDriver:
 
         try:
             self.origin_url = url
-            self.driver.get(url)
             self.driver.implicitly_wait(10)
+            self.driver.get(url)
 
             if cookies:
                 self.add_cookie(cookies)
+                self.driver.implicitly_wait(10)
                 self.driver.get(url)
 
             if isclick:
                 self.click_page()
 
-            print(self.driver.get_cookies())
+            self.check_back()
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
