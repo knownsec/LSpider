@@ -97,9 +97,9 @@ class ChromeDriver:
                 self.driver.get(url)
 
             if isclick:
-                self.click_page()
-
-            self.check_back()
+                if not self.click_page():
+                    self.driver.implicitly_wait(10)
+                    self.driver.get(url)
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
