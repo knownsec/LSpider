@@ -59,7 +59,15 @@ class ChromeDriver:
         self.chrome_options = webdriver.ChromeOptions()
         self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--disable-gpu')
+        self.chrome_options.add_argument('--no-sandbox')
+        self.chrome_options.add_argument('--disable-images')
         self.chrome_options.add_argument('--ignore-certificate-errors')
+        self.chrome_options.add_argument('--allow-running-insecure-content')
+        self.chrome_options.add_argument('blink-settings=imagesEnabled=false')
+        self.chrome_options.add_argument('--omnibox-popup-count="5"')
+        self.chrome_options.add_argument("--disable-popup-blocking")
+        self.chrome_options.add_argument("--disable-web-security")
+        self.chrome_options.add_argument("--disk-cache-size=1000")
 
         # proxy
         desired_capabilities = self.chrome_options.to_capabilities()
