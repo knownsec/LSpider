@@ -69,7 +69,11 @@ class SpiderCoreBackend:
                     task.last_scan_time = nowtime
                     task.save()
 
+                    # 每次只读一个任务，在一个任务后退出重启
+                    break
+
         SubDomainlist = SubDomainList.objects.filter()
+        subdomainid = 1
 
         for subdomain in SubDomainlist:
             lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
@@ -77,6 +81,12 @@ class SpiderCoreBackend:
 
             if lastscantime:
                 if (nowtime - lastscantime).days > 30:
+
+                    # 子域名目标一次只读取100个，多了下次
+                    subdomainid += 1
+                    if subdomainid > 100:
+                        break
+
                     # 1 mouth
                     target = subdomain.subdomain
 
