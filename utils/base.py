@@ -53,26 +53,20 @@ def get_now_scan_id():
 def check_target(target_list):
     result = []
 
-    if ',' in target_list:
-        for target in target_list.split(','):
-            if target:
-                if target.strip().startswith("http://"):
-                    result.append(target.strip())
-                else:
-                    result.append('http://'+target.strip())
+    for target in target_list.split(','):
+        if target.strip():
 
-    elif '\n' in target_list:
-        for target in target_list.split('\n'):
-            if target:
-                if target.strip().startswith("http://") or target.strip().startswith("https://"):
-                    result.append(target.strip())
-                else:
-                    result.append('http://' + target.strip())
+            if '\n' in target:
+                for t in target.split('\n'):
+                    if t.strip():
+                        if t.strip().startswith("http://") or t.strip().startswith("https://"):
+                            result.append(t.strip())
+                        else:
+                            result.append('http://' + t.strip())
 
-    else:
-        if target_list.strip().startswith("http://"):
-            result = [target_list]
-        else:
-            result = ['http://' + target_list]
+            if target.strip().startswith("http://"):
+                result.append(target.strip())
+            else:
+                result.append('http://'+target.strip())
 
     return result
