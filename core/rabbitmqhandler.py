@@ -61,7 +61,7 @@ class RabbitmqHandler:
         # 绑定queue和exchange
         self.scan_target_channel.queue_bind(exchange="scantarget", queue="scantarget", routing_key="scantarget")
 
-        logger.debug("[Monitor][SEND] msg: {}".format(msg))
+        logger.debug("[Scan][SEND] msg: {}".format(msg))
 
         msg_groups = pika.BasicProperties()
         msg_groups.content_type = "text/plain"
@@ -69,6 +69,11 @@ class RabbitmqHandler:
         self.scan_target_channel.basic_publish(body=msg, exchange="scantarget", properties=msg_groups, routing_key="scantarget")
 
         return True
+
+    def get_scan_ready_count(self):
+        if self.conn_broker.is_closed or self.scan_target_channel.is_closed:
+            return 0
+        return self.scan_target_channel.method.message_count
 
     def new_message(self, msg):
 
@@ -88,7 +93,7 @@ class RabbitmqHandler:
         # 绑定queue和exchange
         self.remessage_channel.queue_bind(exchange="remessage", queue="remessage", routing_key="remessage")
 
-        logger.debug("[Monitor][SEND] msg: {}".format(msg[:100]))
+        logger.debug("[Message][SEND] msg: {}".format(msg[:100]))
 
         msg_groups = pika.BasicProperties()
         msg_groups.content_type = "text/plain"
@@ -108,6 +113,7 @@ class RabbitmqHandler:
         # 绑定队列和交换器
         self.scan_target_channel.queue_declare(queue="scantarget", durable=True)
         self.scan_target_channel.queue_bind(queue="scantarget", exchange="scantarget", routing_key="scantarget")
+        self.scan_target_channel.basic_qos(prefetch_count=1)
 
         self.scan_target_channel.basic_consume(fallback, queue="scantarget", consumer_tag="scantarget-consumer")
 

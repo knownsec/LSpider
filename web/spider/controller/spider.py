@@ -11,6 +11,8 @@
 import time
 import datetime
 import traceback
+import threading
+import json
 from queue import Queue, Empty
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
@@ -42,11 +44,42 @@ class SpiderCoreBackend:
         self.target_list = Queue()
         self.threadpool = ThreadPool()
 
+        # rabbitmq init
+        if IS_OPEN_RABBITMQ:
+            self.rabbitmq_handler = RabbitmqHandler()
+
+        t = threading.Thread(target=self.init_scan)
+        t.start()
+        time.sleep(3)
+
+        # 如果队列为空，那么直接跳出
+        if not self.rabbitmq_handler.get_scan_ready_count():
+            logger.info("[Spider Core] Spider Target Queue is empty.")
+            return
+
+        self.scan_id = get_new_scan_id()
+
+        logger.info("[Spider Main] Spider id {} Start.".format(self.scan_id))
+
+        # 获取线程池然后分发信息对象
+        # 当有空闲线程时才继续
+        for i in range(self.threadpool.get_free_num()):
+            spidercore = SpiderCore()
+            logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
+
+            self.threadpool.new(spidercore.scancore)
+            time.sleep(0.5)
+
+        self.threadpool.wait_all_thread()
+
+    def init_scan(self):
+
         tasklist = ScanTask.objects.filter(is_active=True)
 
         for task in tasklist:
             lastscantime = datetime.datetime.strptime(str(task.last_scan_time)[:19], "%Y-%m-%d %H:%M:%S")
             nowtime = datetime.datetime.now()
+            target_cookies = ""
 
             if lastscantime:
                 if (nowtime - lastscantime).days > 30:
@@ -57,7 +90,7 @@ class SpiderCoreBackend:
 
                     for target in targets:
 
-                        self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
 
                         # subdomain scan
                         domain = urlparse(target).netloc
@@ -72,49 +105,29 @@ class SpiderCoreBackend:
                     # 每次只读一个任务，在一个任务后退出重启
                     break
 
-        SubDomainlist = SubDomainList.objects.filter()
-        subdomainid = 1
+            SubDomainlist = SubDomainList.objects.filter()
+            subdomainid = 1
 
-        for subdomain in SubDomainlist:
-            lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
-            nowtime = datetime.datetime.now()
+            for subdomain in SubDomainlist:
+                lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
+                nowtime = datetime.datetime.now()
 
-            if lastscantime:
-                if (nowtime - lastscantime).days > 30:
+                if lastscantime:
+                    if (nowtime - lastscantime).days > 30:
 
-                    # 子域名目标一次只读取100个，多了下次
-                    subdomainid += 1
-                    if subdomainid > 100:
-                        break
+                        # 子域名目标一次只读取50个，多了下次
+                        # subdomainid += 1
+                        # if subdomainid > 50:
+                        #     break
 
-                    # 1 mouth
-                    target = subdomain.subdomain
+                        # 1 mouth
+                        target = subdomain.subdomain
 
-                    self.target_list.put({'url': "http://"+target, 'type': 'link', 'cookies': "", 'deep': 0})
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
 
-                    # 重设扫描时间
-                    subdomain.lastscan = nowtime
-                    subdomain.save()
-
-        # 如果队列为空，那么直接跳出
-        if self.target_list.empty():
-            logger.info("[Spider Core] Spider Target Queue is empty.")
-            return
-
-        self.scan_id = get_new_scan_id()
-
-        logger.info("[Spider Main] Spider id {} Start.".format(self.scan_id))
-
-        # 获取线程池然后分发信息对象
-        # 当有空闲线程时才继续
-        for i in range(self.threadpool.get_free_num()):
-            spidercore = SpiderCore(self.target_list)
-            logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
-
-            self.threadpool.new(spidercore.scan)
-            time.sleep(0.5)
-
-        self.threadpool.wait_all_thread()
+                        # 重设扫描时间
+                        subdomain.lastscan = nowtime
+                        subdomain.save()
 
 
 class SpiderCore:
@@ -122,75 +135,91 @@ class SpiderCore:
     spider core thread
     """
 
-    def __init__(self, target_list=Queue()):
+    def __init__(self):
 
         # rabbitmq init
         if IS_OPEN_RABBITMQ:
             self.rabbitmq_handler = RabbitmqHandler()
 
         # self.target = target
-        self.target_list = target_list
+        self.target_list = Queue()
 
         self.req = LReq(is_chrome=True)
         self.scan_id = get_now_scan_id()
+        self.i = 1
 
-    def scan(self):
+    def scancore(self):
+        # start
+        logger.info("[Scan Core] Scan Task start:>")
+        self.rabbitmq_handler.start_scan_target(self.scan_task_distribute)
+
+    def scan_task_distribute(self, channel, method, header, message):
+
+        self.i += 1
+        if self.i > 200:
+            channel.basic_cancel(channel, nowait=False)
+            # after target list finish
+            self.req.close_driver()
+            return False
+
+        # 确认收到消息
+        channel.basic_ack(delivery_tag=method.delivery_tag)
+
+        # 获取任务信息
+        task = json.loads(message)
+
+        try:
+            self.scan(task)
+        except:
+            # 任务启动错误则把任务重新插回去
+            self.rabbitmq_handler.new_scan_target(message)
+            time.sleep(0.5)
+            return False
+
+    def scan(self, target):
         i = 0
 
-        while not self.target_list.empty() or i < 30:
+        try:
+            # sleep
+            time.sleep(self.req.get_timeout())
 
-            try:
-                # sleep
-                time.sleep(self.req.get_timeout())
+            # target = self.target_list.get(False)
+            content = False
 
-                target = self.target_list.get(False)
-                content = False
+            if target['type'] == 'link':
+                content = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
-                if target['type'] == 'link':
-                    content = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
+            if target['type'] == 'js':
+                content = self.req.get(target['url'], 'Resp', 0, target['cookies'])
 
-                if target['type'] == 'js':
-                    content = self.req.get(target['url'], 'Resp', 0, target['cookies'])
+            if not content:
+                return
 
-                if not content:
+            result_list = html_parser(content)
+            result_list = url_parser(target['url'], result_list, target['deep'])
+
+            # 继续把链接加入列表
+            for target in result_list:
+
+                # save to rabbitmq
+                if IS_OPEN_RABBITMQ:
+                    self.rabbitmq_handler.new_scan_target(str(target))
+
+                if target['deep'] > LIMIT_DEEP:
                     continue
 
-                result_list = html_parser(content)
-                result_list = url_parser(target['url'], result_list, target['deep'])
+                self.target_list.put(target)
 
-                # 继续把链接加入列表
-                for target in result_list:
+        except KeyboardInterrupt:
+            logger.error("[Scan] Stop Scaning.")
+            self.req.close_driver()
+            exit(0)
 
-                    # save to rabbitmq
-                    if IS_OPEN_RABBITMQ:
-                        self.rabbitmq_handler.new_scan_target(str(target))
+        except Empty:
+            i += 1
+            time.sleep(1)
 
-                    if target['deep'] > LIMIT_DEEP:
-                        continue
+        except:
+            logger.warning('[Scan] something error, {}'.format(traceback.format_exc()))
+            raise
 
-                    self.target_list.put(target)
-
-            except KeyboardInterrupt:
-                logger.error("[Scan] Stop Scaning.")
-                self.req.close_driver()
-                exit(0)
-
-            except Empty:
-                i += 1
-                time.sleep(1)
-
-            except:
-                logger.warning('[Scan] something error, {}'.format(traceback.format_exc()))
-                continue
-
-        # after target list finish
-        self.req.close_driver()
-
-
-if __name__ == "__main__":
-
-    scancore = SpiderCore()
-
-    scancore.target_list.put({'url': 'https://lorexxar.cn', 'type': 'link', 'deep': 0})
-    # scancore.target_list.put({'url': "https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js", 'type': 'js', 'deep': 0})
-    scancore.scan()
