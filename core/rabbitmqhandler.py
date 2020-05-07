@@ -43,7 +43,7 @@ class RabbitmqHandler:
 
         return True
 
-    def new_scan_target(self, msg):
+    def check_link_and_bind_scan(self):
 
         if self.conn_broker.is_closed:
             # reconnect
@@ -61,6 +61,9 @@ class RabbitmqHandler:
         # 绑定queue和exchange
         self.scan_target_channel.queue_bind(exchange="scantarget", queue="scantarget", routing_key="scantarget")
 
+    def new_scan_target(self, msg):
+        self.check_link_and_bind_scan()
+
         logger.debug("[Scan][SEND] msg: {}".format(msg))
 
         msg_groups = pika.BasicProperties()
@@ -71,34 +74,38 @@ class RabbitmqHandler:
         return True
 
     def get_scan_ready_count(self):
+
+        self.check_link_and_bind_scan()
+
         if self.conn_broker.is_closed or self.scan_target_channel.is_closed:
             return 0
+
         return self.scan_target_channel.get_waiting_message_count()
 
-    def new_message(self, msg):
-
-        if self.conn_broker.is_closed:
-            # reconnect
-            self.connection = pika.ConnectionParameters(host=self.ip, port=self.port, credentials=self.credentials,
-                                                        virtual_host=RABBITMQ_VHOST)
-            self.conn_broker = pika.BlockingConnection(self.connection)
-
-        if self.remessage_channel.is_closed:
-            # reconnect
-            self.remessage_channel = self.conn_broker.channel()
-
-        self.remessage_channel.exchange_declare(exchange="remessage", exchange_type="direct", passive=False, durable=True, auto_delete=False)
-        # 防止queue不存在，新建queue
-        self.remessage_channel.queue_declare(queue="remessage", durable=True)
-        # 绑定queue和exchange
-        self.remessage_channel.queue_bind(exchange="remessage", queue="remessage", routing_key="remessage")
-
-        logger.debug("[Message][SEND] msg: {}".format(msg[:100]))
-
-        msg_groups = pika.BasicProperties()
-        msg_groups.content_type = "text/plain"
-
-        self.remessage_channel.basic_publish(body=msg, exchange="remessage", properties=msg_groups, routing_key="remessage")
+    # def new_message(self, msg):
+    #
+    #     if self.conn_broker.is_closed:
+    #         # reconnect
+    #         self.connection = pika.ConnectionParameters(host=self.ip, port=self.port, credentials=self.credentials,
+    #                                                     virtual_host=RABBITMQ_VHOST)
+    #         self.conn_broker = pika.BlockingConnection(self.connection)
+    #
+    #     if self.remessage_channel.is_closed:
+    #         # reconnect
+    #         self.remessage_channel = self.conn_broker.channel()
+    #
+    #     self.remessage_channel.exchange_declare(exchange="remessage", exchange_type="direct", passive=False, durable=True, auto_delete=False)
+    #     # 防止queue不存在，新建queue
+    #     self.remessage_channel.queue_declare(queue="remessage", durable=True)
+    #     # 绑定queue和exchange
+    #     self.remessage_channel.queue_bind(exchange="remessage", queue="remessage", routing_key="remessage")
+    #
+    #     logger.debug("[Message][SEND] msg: {}".format(msg[:100]))
+    #
+    #     msg_groups = pika.BasicProperties()
+    #     msg_groups.content_type = "text/plain"
+    #
+    #     self.remessage_channel.basic_publish(body=msg, exchange="remessage", properties=msg_groups, routing_key="remessage")
 
     def get_scan_target_channel(self):
         return self.scan_target_channel
@@ -121,7 +128,3 @@ class RabbitmqHandler:
         self.scan_target_channel.start_consuming()
 
 
-if __name__ == "__main__":
-    r = RabbitmqHandler()
-
-    r.new_message("test3")
