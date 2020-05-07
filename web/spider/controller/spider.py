@@ -59,7 +59,7 @@ class SpiderCoreBackend:
 
         self.scan_id = get_new_scan_id()
 
-        logger.info("[Spider Main] Spider id {} Start.".format(self.scan_id))
+        logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, self.rabbitmq_handler.get_scan_ready_count()))
 
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续

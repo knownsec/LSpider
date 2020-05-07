@@ -57,9 +57,11 @@ class RabbitmqHandler:
 
         self.scan_target_channel.exchange_declare(exchange="scantarget", exchange_type="direct", passive=False, durable=True, auto_delete=False)
         # 防止queue不存在，新建queue
-        self.scan_target_channel.queue_declare(queue="scantarget", durable=True)
+        queue = self.scan_target_channel.queue_declare(queue="scantarget", durable=True)
         # 绑定queue和exchange
         self.scan_target_channel.queue_bind(exchange="scantarget", queue="scantarget", routing_key="scantarget")
+
+        return queue
 
     def new_scan_target(self, msg):
         self.check_link_and_bind_scan()
@@ -75,12 +77,12 @@ class RabbitmqHandler:
 
     def get_scan_ready_count(self):
 
-        self.check_link_and_bind_scan()
+        queue = self.check_link_and_bind_scan()
 
         if self.conn_broker.is_closed or self.scan_target_channel.is_closed:
             return 0
 
-        return self.scan_target_channel.get_waiting_message_count()
+        return queue.method.message_count
 
     # def new_message(self, msg):
     #
