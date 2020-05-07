@@ -124,7 +124,7 @@ class RabbitmqHandler:
         self.scan_target_channel.queue_bind(queue="scantarget", exchange="scantarget", routing_key="scantarget")
         self.scan_target_channel.basic_qos(prefetch_count=1)
 
-        self.scan_target_channel.basic_consume(fallback, queue="scantarget", consumer_tag="scantarget-consumer")
+        self.scan_target_channel.basic_consume("scantarget", fallback, consumer_tag="scantarget-consumer")
 
         #开始订阅
         self.scan_target_channel.start_consuming()
