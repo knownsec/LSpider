@@ -163,3 +163,30 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# Chrome webdriver
+CHROME_WEBDRIVER_PATH = os.path.join(BASE_DIR, 'bin/')
+
+# setting for spider
+
+LIMIT_DEEP = 2
+THREADPOOL_MAX_THREAD_NUM = 5
+
+# rabbitmq
+RABBITMQ_IP = ""
+RABBITMQ_PORT = ""
+RABBITMQ_USERNAME = ""
+RABBITMQ_PASSWORD = ""
+RABBITMQ_VHOST = ""
+
+# wheather open rabbitmq
+IS_OPEN_RABBITMQ = True
+
+# proxy for chrome headless
+IS_OPEN_CHROME_PROXY = False
+CHROME_PROXY = '127.0.0.1:7777'
+
+# for hackerone
+HACKERONE_USERNAME = ""
+HACKERONE_PASSWORD = ""

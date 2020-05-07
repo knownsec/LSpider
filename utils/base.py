@@ -64,9 +64,10 @@ def check_target(target_list):
                         else:
                             result.append('http://' + t.strip())
 
-            if target.strip().startswith("http://"):
-                result.append(target.strip())
             else:
-                result.append('http://'+target.strip())
+                if target.strip().startswith("http://"):
+                    result.append(target.strip())
+                else:
+                    result.append('http://'+target.strip())
 
     return result

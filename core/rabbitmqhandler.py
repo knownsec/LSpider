@@ -73,7 +73,7 @@ class RabbitmqHandler:
     def get_scan_ready_count(self):
         if self.conn_broker.is_closed or self.scan_target_channel.is_closed:
             return 0
-        return self.scan_target_channel.method.message_count
+        return self.scan_target_channel.get_waiting_message_count()
 
     def new_message(self, msg):
 
