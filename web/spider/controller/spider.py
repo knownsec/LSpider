@@ -156,7 +156,7 @@ class SpiderCore:
     def scan_task_distribute(self, channel, method, header, message):
 
         self.i += 1
-        if self.i > 200:
+        if self.i > 1000:
             channel.basic_cancel(channel, nowait=False)
             # after target list finish
             self.req.close_driver()
@@ -195,20 +195,22 @@ class SpiderCore:
             if not content:
                 return
 
+            backend_cookies = target['cookies']
+
             result_list = html_parser(content)
-            result_list = url_parser(target['url'], result_list, target['deep'])
+            result_list = url_parser(target['url'], result_list, target['deep'], backend_cookies)
 
             # 继续把链接加入列表
             for target in result_list:
 
                 # save to rabbitmq
                 if IS_OPEN_RABBITMQ:
-                    self.rabbitmq_handler.new_scan_target(str(target))
+                    self.rabbitmq_handler.new_scan_target(json.dumps(target))
 
                 if target['deep'] > LIMIT_DEEP:
                     continue
 
-                self.target_list.put(target)
+                # self.target_list.put(target)
 
         except KeyboardInterrupt:
             logger.error("[Scan] Stop Scaning.")
