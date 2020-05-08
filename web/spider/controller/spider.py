@@ -165,10 +165,14 @@ class SpiderCore:
         # 确认收到消息
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
-        # 获取任务信息
-        task = json.loads(message)
-
         try:
+            # 获取任务信息
+            task = json.loads(message)
+
+            self.scan(task)
+        except json.decoder.JSONDecodeError:
+            task = eval(message)
+
             self.scan(task)
         except:
             # 任务启动错误则把任务重新插回去
