@@ -53,13 +53,22 @@ class SpiderCoreBackend:
         time.sleep(3)
 
         # 如果队列为空，那么直接跳出
-        if not self.rabbitmq_handler.get_scan_ready_count():
+        if IS_OPEN_RABBITMQ and not self.rabbitmq_handler.get_scan_ready_count():
+            logger.info("[Spider Core] Spider Target Queue is empty.")
+            return
+
+        if not IS_OPEN_RABBITMQ and self.target_list.empty():
             logger.info("[Spider Core] Spider Target Queue is empty.")
             return
 
         self.scan_id = get_new_scan_id()
 
-        logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, self.rabbitmq_handler.get_scan_ready_count()))
+        if IS_OPEN_RABBITMQ:
+            left_tasks = self.rabbitmq_handler.get_scan_ready_count()
+        else:
+            left_tasks = self.target_list.qsize()
+
+        logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, left_tasks))
 
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续
@@ -67,7 +76,10 @@ class SpiderCoreBackend:
             spidercore = SpiderCore()
             logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
 
-            self.threadpool.new(spidercore.scancore)
+            if IS_OPEN_RABBITMQ:
+                self.threadpool.new(spidercore.scancore)
+            else:
+                self.threadpool.new(spidercore.scan_for_queue)
             time.sleep(0.5)
 
         self.threadpool.wait_all_thread()
@@ -90,7 +102,10 @@ class SpiderCoreBackend:
 
                     for target in targets:
 
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
+                        if IS_OPEN_RABBITMQ:
+                            self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
+                        else:
+                            self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
 
                         # subdomain scan
                         domain = urlparse(target).netloc
@@ -123,7 +138,11 @@ class SpiderCoreBackend:
                         # 1 mouth
                         target = subdomain.subdomain
 
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                        if IS_OPEN_RABBITMQ:
+                            self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                        else:
+                            self.target_list.put(
+                                {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
 
                         # 重设扫描时间
                         subdomain.lastscan = nowtime
@@ -156,7 +175,7 @@ class SpiderCore:
     def scan_task_distribute(self, channel, method, header, message):
 
         self.i += 1
-        if self.i > 1000:
+        if self.i > 4000:
             channel.basic_cancel(channel, nowait=False)
             # after target list finish
             self.req.close_driver()
@@ -179,6 +198,30 @@ class SpiderCore:
             self.rabbitmq_handler.new_scan_target(message)
             time.sleep(0.5)
             return False
+
+    def scan_for_queue(self):
+
+        i = 0
+
+        while not self.target_list.empty() or i < 30:
+            try:
+                target = self.target_list.get(False)
+
+                self.scan(target)
+
+            except KeyboardInterrupt:
+                logger.error("[Scan] Stop Scaning.")
+                self.req.close_driver()
+                exit(0)
+
+            except Empty:
+                i += 1
+                time.sleep(1)
+
+            except:
+                logger.warning('[Scan] something error, {}'.format(traceback.format_exc()))
+                raise
+
 
     def scan(self, target):
         i = 0
@@ -210,6 +253,8 @@ class SpiderCore:
                 # save to rabbitmq
                 if IS_OPEN_RABBITMQ:
                     self.rabbitmq_handler.new_scan_target(json.dumps(target))
+                else:
+                    self.target_list.put(target)
 
                 if target['deep'] > LIMIT_DEEP:
                     continue
