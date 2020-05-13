@@ -47,7 +47,10 @@ def get_new_scan_id():
 
 def get_now_scan_id():
     s1 = ScanTable.objects.last()
-    return s1.id
+    if s1:
+        return s1.id
+    else:
+        return get_new_scan_id()
 
 
 def check_target(target_list):

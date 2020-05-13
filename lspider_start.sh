@@ -6,5 +6,5 @@ do
         echo "start"
         /usr/bin/python3 /home/ubuntu/lorexxar/LSpider/manage.py SpiderCoreBackendStart
     fi
-    sleep 600
+    sleep 100
 done
