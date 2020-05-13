@@ -154,14 +154,14 @@ class SpiderCore:
     spider core thread
     """
 
-    def __init__(self):
+    def __init__(self, target=Queue()):
 
         # rabbitmq init
         if IS_OPEN_RABBITMQ:
             self.rabbitmq_handler = RabbitmqHandler()
 
         # self.target = target
-        self.target_list = Queue()
+        self.target_list = target
 
         self.req = LReq(is_chrome=True)
         self.scan_id = get_now_scan_id()
