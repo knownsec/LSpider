@@ -62,7 +62,7 @@ class CrtScan:
                     for predoamin in predomain_list:
                         if '.' in predoamin and '*' not in predoamin:
                             if predoamin not in result_list:
-                                result_list.append(predoamin)
+                                result_list.append(predoamin.strip())
 
         except:
             traceback.print_exc()

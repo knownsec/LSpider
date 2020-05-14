@@ -73,7 +73,7 @@ def url_parser(domain, target_list, deep=0, backend_cookies = ""):
             else:
                 request_url = urljoin(domain, temp_result.path)
 
-            result_list.append({'url': request_url, 'type': 'link', 'cookies': backend_cookies, 'deep': deep + 1})
+            result_list.append({'url': request_url.strip(), 'type': 'link', 'cookies': backend_cookies, 'deep': deep + 1})
 
             if temp_result.netloc == "":
                 target_domain = origin_domain
@@ -103,7 +103,7 @@ def url_filter(target_list):
         domain_list = target_list[domain]
 
         # 读数据库数据做聚合分析
-        database_urllist = UrlTable.objects.filter(domain=domain, scanid=get_now_scan_id())
+        database_urllist = UrlTable.objects.filter(domain=domain)
 
         for url in database_urllist:
             domain_list.append(urlparse(url.url))

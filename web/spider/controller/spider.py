@@ -222,7 +222,6 @@ class SpiderCore:
                 logger.warning('[Scan] something error, {}'.format(traceback.format_exc()))
                 raise
 
-
     def scan(self, target):
         i = 0
 
