@@ -65,12 +65,14 @@ def check_target(target_list):
                         if t.strip().startswith("http://") or t.strip().startswith("https://"):
                             result.append(t.strip())
                         else:
-                            result.append('http://' + t.strip())
+                            if t.strip():
+                                result.append('http://' + t.strip())
 
             else:
                 if target.strip().startswith("http://"):
                     result.append(target.strip())
                 else:
-                    result.append('http://'+target.strip())
+                    if target.strip():
+                        result.append('http://'+target.strip())
 
     return result
