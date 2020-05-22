@@ -174,12 +174,12 @@ class SpiderCore:
 
     def scan_task_distribute(self, channel, method, header, message):
 
-        self.i += 1
-        if self.i > 10000:
-            channel.basic_cancel(channel, nowait=False)
-            # after target list finish
-            self.req.close_driver()
-            return False
+        # self.i += 1
+        # if self.i > 10000:
+        #     channel.basic_cancel(channel, nowait=False)
+        #     # after target list finish
+        #     self.req.close_driver()
+        #     return False
 
         # 确认收到消息
         channel.basic_ack(delivery_tag=method.delivery_tag)
