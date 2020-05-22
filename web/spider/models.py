@@ -5,7 +5,7 @@ from django.db import models
 
 
 class SubDomainList(models.Model):
-    subdomain = models.CharField(max_length=50)
+    subdomain = models.CharField(max_length=200)
     lastscan = models.DateTimeField()
 
 
