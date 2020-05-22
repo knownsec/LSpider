@@ -72,7 +72,7 @@ class SpiderCoreBackend:
 
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续
-        for i in range(self.threadpool.get_free_num()):
+        while self.threadpool.get_free_num():
             spidercore = SpiderCore(self.target_list)
             logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
 
