@@ -74,20 +74,22 @@ class SpiderCoreBackend:
         # 当有空闲线程时才继续
         i = 0
 
-        while self.threadpool.get_free_num():
+        while 1:
+            while self.threadpool.get_free_num():
 
-            i += 1
-            spidercore = SpiderCore(self.target_list)
+                i += 1
+                spidercore = SpiderCore(self.target_list)
 
-            logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
+                logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
 
-            if IS_OPEN_RABBITMQ:
-                self.threadpool.new(spidercore.scancore)
-            else:
-                self.threadpool.new(spidercore.scan_for_queue)
-            time.sleep(0.5)
+                if IS_OPEN_RABBITMQ:
+                    self.threadpool.new(spidercore.scancore)
+                else:
+                    self.threadpool.new(spidercore.scan_for_queue)
+                time.sleep(0.5)
 
-        self.threadpool.wait_all_thread()
+            self.threadpool.wait_all_thread()
+            time.sleep(1)
 
     def init_scan(self):
 

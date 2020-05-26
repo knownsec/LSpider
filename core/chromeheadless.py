@@ -72,6 +72,7 @@ class ChromeDriver:
         # proxy
         desired_capabilities = self.chrome_options.to_capabilities()
         if IS_OPEN_CHROME_PROXY:
+            logger.info("[Chrome Headless] Proxy {} init".format(CHROME_PROXY))
 
             desired_capabilities['acceptSslCerts'] = True
             desired_capabilities['acceptInsecureCerts'] = True
@@ -84,6 +85,7 @@ class ChromeDriver:
                 "class": "org.openqa.selenium.Proxy",
                 "autodetect": False,
             }
+            self.chrome_options.add_argument('--proxy-server=http://{}'.format(CHROME_PROXY))
 
         self.chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
 
