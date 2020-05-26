@@ -88,7 +88,7 @@ class SpiderCoreBackend:
                     self.threadpool.new(spidercore.scan_for_queue)
                 time.sleep(0.5)
 
-            self.threadpool.wait_all_thread()
+            # self.threadpool.wait_all_thread()
             time.sleep(1)
 
     def init_scan(self):
