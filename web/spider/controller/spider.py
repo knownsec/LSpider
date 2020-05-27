@@ -13,6 +13,7 @@ import datetime
 import traceback
 import threading
 import json
+from pika import exceptions as pika_exceptions
 from queue import Queue, Empty
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
@@ -78,16 +79,21 @@ class SpiderCoreBackend:
         while 1:
             while self.threadpool.get_free_num():
 
-                i += 1
-                spidercore = SpiderCore(self.target_list)
+                if i > 100:
+                    logger.warning("[Spider Core] More than 100 thread init. stop new Thread.")
+                    self.threadpool.wait_all_thread()
 
-                logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
-
-                if IS_OPEN_RABBITMQ:
-                    self.threadpool.new(spidercore.scancore)
                 else:
-                    self.threadpool.new(spidercore.scan_for_queue)
-                time.sleep(0.5)
+                    i += 1
+                    spidercore = SpiderCore(self.target_list)
+
+                    logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
+
+                    if IS_OPEN_RABBITMQ:
+                        self.threadpool.new(spidercore.scancore)
+                    else:
+                        self.threadpool.new(spidercore.scan_for_queue)
+                    time.sleep(0.5)
 
             # self.threadpool.wait_all_thread()
             time.sleep(1)
@@ -95,11 +101,12 @@ class SpiderCoreBackend:
     def init_scan(self):
 
         tasklist = ScanTask.objects.filter(is_active=True)
+        new_task = False
 
         for task in tasklist:
             lastscantime = datetime.datetime.strptime(str(task.last_scan_time)[:19], "%Y-%m-%d %H:%M:%S")
             nowtime = datetime.datetime.now()
-            target_cookies = ""
+            target_cookies = task.cookies
 
             if lastscantime:
                 if (nowtime - lastscantime).days > 30:
@@ -126,10 +133,9 @@ class SpiderCoreBackend:
                     task.save()
 
                     # 每次只读一个任务，在一个任务后退出重启
-                    break
+                    new_task = True
 
             SubDomainlist = SubDomainList.objects.filter()
-            subdomainid = 1
 
             for subdomain in SubDomainlist:
                 lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
@@ -138,13 +144,8 @@ class SpiderCoreBackend:
                 if lastscantime:
                     if (nowtime - lastscantime).days > 30:
 
-                        # 子域名目标一次只读取50个，多了下次
-                        # subdomainid += 1
-                        # if subdomainid > 50:
-                        #     break
-
                         # 1 mouth
-                        target = subdomain.subdomain
+                        target = subdomain.subdomain.strip()
 
                         if IS_OPEN_RABBITMQ:
                             self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
@@ -155,6 +156,10 @@ class SpiderCoreBackend:
                         # 重设扫描时间
                         subdomain.lastscan = nowtime
                         subdomain.save()
+
+            if new_task:
+                # 每次只读一个任务，在一个任务后退出重启
+                break
 
 
 class SpiderCore:
@@ -201,6 +206,7 @@ class SpiderCore:
             task = eval(message)
 
             self.scan(task)
+
         except:
             # 任务启动错误则把任务重新插回去
             self.rabbitmq_handler.new_scan_target(message)

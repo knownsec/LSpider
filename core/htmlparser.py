@@ -45,7 +45,7 @@ def html_parser(content):
 
         for script_tag in script_tag_list:
             if script_tag.get('src'):
-                result_list.append({"type": "js", "url": script_tag.get('src')})
+                result_list.append({"type": "link", "url": script_tag.get('src')})
 
         link_tag_list = soup.find_all('a')
 
@@ -68,7 +68,8 @@ def html_parser(content):
                 return result_list
 
             # match
-            result_list.append({"type": "link", "url": match_content('((ht|f)tps?)://[\w\-]+(\.[\w\-]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?', content)})
+            for url in match_content('((ht|f)tps?)://[\w\-]+(\.[\w\-]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?', content):
+                result_list.append({"type": "link", "url": url})
             
 
     except:

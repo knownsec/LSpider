@@ -119,6 +119,9 @@ class RabbitmqHandler:
         return
 
     def start_scan_target(self, fallback):
+
+        self.check_link_and_bind_scan()
+
         # 绑定队列和交换器
         self.scan_target_channel.queue_declare(queue="scantarget", durable=True)
         self.scan_target_channel.queue_bind(queue="scantarget", exchange="scantarget", routing_key="scantarget")
@@ -127,6 +130,9 @@ class RabbitmqHandler:
         self.scan_target_channel.basic_consume("scantarget", fallback, consumer_tag="scantarget-consumer")
 
         #开始订阅
-        self.scan_target_channel.start_consuming()
-
+        try:
+            self.scan_target_channel.start_consuming()
+        except pika.exceptions.StreamLostError:
+            logger.error("[Rabbitmq] Scan consum tranport error.")
+            return False
 
