@@ -28,6 +28,7 @@ from core.threadingpool import ThreadPool
 from core.rabbitmqhandler import RabbitmqHandler
 
 from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ
+from LSpider.settings import IS_OPEN_CHROME_PROXY, CHROME_PROXY
 
 from web.spider.models import UrlTable, SubDomainList
 from web.index.models import ScanTask
@@ -256,14 +257,14 @@ class SpiderCore:
             # 继续把链接加入列表
             for target in result_list:
 
+                if target['deep'] > LIMIT_DEEP:
+                    continue
+
                 # save to rabbitmq
                 if IS_OPEN_RABBITMQ:
                     self.rabbitmq_handler.new_scan_target(json.dumps(target))
                 else:
                     self.target_list.put(target)
-
-                if target['deep'] > LIMIT_DEEP:
-                    continue
 
                 # self.target_list.put(target)
 
