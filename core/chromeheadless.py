@@ -120,6 +120,13 @@ class ChromeDriver:
             self.get_resp(url, cookies, times+1, isclick)
             return False
 
+        except selenium.common.exceptions.InvalidCookieDomainException:
+            logger.warning("[ChromeHeadless]Chrome Headless request with cookie error..{}".format(url))
+
+            logger.warning("[ChromeHeadless]retry once..{}".format(url))
+            self.get_resp(url, None, times + 1, isclick)
+            return False
+
         except selenium.common.exceptions.InvalidArgumentException:
             logger.warning("[ChromeHeadless]Request error...{}".format(url))
             logger.warning("[ChromeHeadless]{}".format(traceback.format_exc()))
