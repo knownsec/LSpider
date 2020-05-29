@@ -201,9 +201,17 @@ class SpiderCore:
             # 获取任务信息
             task = json.loads(message)
 
+            if checkbanlist(task['url']):
+                logger.debug(("[Scan] ban domain exist...continue"))
+                return False
+
             self.scan(task)
         except json.decoder.JSONDecodeError:
             task = eval(message)
+
+            if checkbanlist(task['url']):
+                logger.debug(("[Scan] ban domain exist...continue"))
+                return False
 
             self.scan(task)
 
