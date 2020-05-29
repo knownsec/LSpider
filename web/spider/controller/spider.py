@@ -24,7 +24,7 @@ from utils.base import get_new_scan_id, get_now_scan_id
 from utils.base import check_target
 
 from core.htmlparser import html_parser
-from core.urlparser import url_parser
+from core.urlparser import url_parser, checkbanlist
 from core.threadingpool import ThreadPool
 from core.rabbitmqhandler import RabbitmqHandler
 
@@ -220,6 +220,10 @@ class SpiderCore:
         while not self.target_list.empty() or i < 30:
             try:
                 target = self.target_list.get(False)
+
+                if checkbanlist(target['url']):
+                    logger.debug(("[Scan] ban domain exist...continue"))
+                    continue
 
                 self.scan(target)
 

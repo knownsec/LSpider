@@ -57,4 +57,4 @@ day_time = int(time.mktime(datetime.date.today().timetuple()))
 logfile = os.path.join(log_path, str(day_time)+'.log')
 
 # log
-log(logging.DEBUG, logfile)
+log(logging.INFO, logfile)
