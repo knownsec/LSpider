@@ -111,6 +111,17 @@ class ChromeDriver:
                     self.driver.implicitly_wait(10)
                     self.driver.get(url)
 
+            return self.driver.page_source
+
+        except selenium.common.exceptions.InvalidSessionIdException:
+            logger.warning("[ChromeHeadless]Chrome Headless quit unexpectedly..")
+
+            self.init_object()
+
+            logger.warning("[ChromeHeadless]retry once..{}".format(url))
+            self.get_resp(url, cookies, times + 1, isclick)
+            return False
+
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
             if times > 0:
@@ -131,8 +142,6 @@ class ChromeDriver:
             logger.warning("[ChromeHeadless]Request error...{}".format(url))
             logger.warning("[ChromeHeadless]{}".format(traceback.format_exc()))
             return False
-
-        return self.driver.page_source
 
     def add_cookie(self, cookies):
 
