@@ -82,6 +82,7 @@ class SpiderCoreBackend:
                 if i > 100:
                     logger.warning("[Spider Core] More than 100 thread init. stop new Thread.")
                     self.threadpool.wait_all_thread()
+                    break
 
                 else:
                     i += 1

@@ -38,7 +38,7 @@ class RabbitmqHandler:
 
         self.credentials = pika.PlainCredentials(self.user, self.password)
         self.connection = pika.ConnectionParameters(host=self.ip, port=self.port, credentials=self.credentials,
-                                                    virtual_host=RABBITMQ_VHOST)
+                                                    virtual_host=RABBITMQ_VHOST, heartbeat=600, blocked_connection_timeout=300)
         self.conn_broker = pika.BlockingConnection(self.connection)
 
         return True
@@ -48,7 +48,7 @@ class RabbitmqHandler:
         if self.conn_broker.is_closed:
             # reconnect
             self.connection = pika.ConnectionParameters(host=self.ip, port=self.port, credentials=self.credentials,
-                                                        virtual_host=RABBITMQ_VHOST)
+                                                        virtual_host=RABBITMQ_VHOST, heartbeat=600, blocked_connection_timeout=300)
             self.conn_broker = pika.BlockingConnection(self.connection)
 
         if self.scan_target_channel.is_closed:
@@ -120,7 +120,7 @@ class RabbitmqHandler:
 
     def start_scan_target(self, fallback):
 
-        self.check_link_and_bind_scan()
+        # self.check_link_and_bind_scan()
 
         # 绑定队列和交换器
         self.scan_target_channel.queue_declare(queue="scantarget", durable=True)
