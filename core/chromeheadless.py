@@ -69,6 +69,9 @@ class ChromeDriver:
         self.chrome_options.add_argument("--disable-web-security")
         self.chrome_options.add_argument("--disk-cache-size=1000")
 
+        prefs = {'profile.default_content_settings.popups': 0, 'download.default_directory': '/tmp'}
+        self.chrome_options.add_experimental_option('prefs', prefs)
+
         # proxy
         desired_capabilities = self.chrome_options.to_capabilities()
         if IS_OPEN_CHROME_PROXY:
