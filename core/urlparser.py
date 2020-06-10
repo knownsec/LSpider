@@ -175,7 +175,11 @@ def check_same(flag, origin_target_list, new_target):
                 if origin_path[i] != new_target_path[i]:
                     # 当不同的是最后一部分，那么直接判定为不想似
                     if origin_path[i] == origin_path[-1]:
-                        check_flag_one = True
+                        # 如果不同的只有最后一部分，那么这个路径下上限100条路由
+                        if len(origin_target_list) > 100:
+                            check_flag_one = False
+                        else:
+                            check_flag_one = True
 
                         # 如果存在特殊字符，那么不计入
                         for banword in BANWORD_LAST_LIST:
