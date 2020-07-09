@@ -110,7 +110,7 @@ class SpiderCoreBackend:
             target_cookies = task.cookies
 
             if lastscantime:
-                if (nowtime - lastscantime).days > 30:
+                if (nowtime - lastscantime).days > 90:
                     # 1 mouth
                     targets = check_target(task.target)
                     target_type = task.target_type
