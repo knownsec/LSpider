@@ -18,7 +18,7 @@ URL_TYPE = {
 class UrlTable(models.Model):
     domain = models.CharField(max_length=50)
     type = models.CharField(max_length=10, default='link')
-    url = models.CharField(max_length=1500)
+    url = models.CharField(max_length=2000)
     scanid = models.IntegerField(default=0)
 
 

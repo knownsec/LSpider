@@ -98,12 +98,25 @@ def url_filter(target_list):
     """
     result_list = []
 
+    # 存在黑名单路径的数量
+    black_path_count = 0
+
+    # 黑名单域名
+    BLACK_DOMAIN_NAME_LIST = ['docs', 'image', 'static']
+
     for domain in target_list:
         temp_list = {}
         domain_list = target_list[domain]
 
         # 读数据库数据做聚合分析
         database_urllist = UrlTable.objects.filter(domain=domain)
+
+        # 如果存在黑名单词语的域名超过200条则跳过
+        for BLACK_DOMAIN_NAME in BLACK_DOMAIN_NAME_LIST:
+            if BLACK_DOMAIN_NAME in domain:
+                if len(database_urllist) > 200:
+                    logger.warning("[URL Filter] Domain {} has black word and more than 200.".format(domain))
+                    continue
 
         for url in database_urllist:
             domain_list.append(urlparse(url.url))
@@ -131,7 +144,7 @@ def url_filter(target_list):
                 temp_list[flag] = [target]
 
             else:
-                if check_same(flag, temp_list[flag], target):
+                if check_same(flag, temp_list[flag], target, black_path_count):
                     # 直接存入url
                     temp_list[flag].append(target)
 
@@ -142,7 +155,7 @@ def url_filter(target_list):
     return result_list
 
 
-def check_same(flag, origin_target_list, new_target):
+def check_same(flag, origin_target_list, new_target, black_path_count=0):
     """
     检查相似性
 
@@ -151,6 +164,7 @@ def check_same(flag, origin_target_list, new_target):
 
     check_flag = True
     BANWORD_LAST_LIST = ['.htm', '.png', '.jpg', '.mp']
+    BLACK_PATH_NAME = ['static', 'upload', 'docs', 'js', 'css', 'font', 'image']
 
     for origin_target in origin_target_list:
 
@@ -162,6 +176,9 @@ def check_same(flag, origin_target_list, new_target):
         is_diff_last = False
         is_has_banword = False
 
+        # 存在黑名单路径的数量
+        black_path_count = black_path_count
+
         origin_path = origin_target.path.split('/')
         new_target_path = new_target.path.split('/')
 
@@ -170,11 +187,21 @@ def check_same(flag, origin_target_list, new_target):
                 i += 1
                 continue
             if m == 'B':
+                for black_path in BLACK_PATH_NAME:
+                    if black_path in new_target_path[i]:
+                        black_path_count += 1
+
+                    # 每个域名下的黑名单路径只允许100个，同时计算
+                    if black_path_count > 100:
+                        check_flag_one = False
+                        is_has_banword = True
 
                 # check B string
                 if origin_path[i] != new_target_path[i]:
+
                     # 当不同的是最后一部分，那么直接判定为不想似
                     if origin_path[i] == origin_path[-1]:
+
                         # 如果不同的只有最后一部分，那么这个路径下上限100条路由
                         if len(origin_target_list) > 100:
                             check_flag_one = False

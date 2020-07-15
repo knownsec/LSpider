@@ -53,11 +53,17 @@ def html_parser(content):
             if link_tag.get('href'):
                 result_list.append({"type": "link", "url": link_tag.get('href')})
 
-        form_tag_list = soup.find_all('from')
+        form_tag_list = soup.find_all('form')
 
         for form_tag in form_tag_list:
             if form_tag.get('action'):
                 result_list.append({"type": "link", "url": form_tag.get('action')})
+
+        iframe_tag_list = soup.find_all('iframe')
+
+        for iframe_tag in iframe_tag_list:
+            if iframe_tag.get('src'):
+                result_list.append({"type": "link", "url": iframe_tag.get('src')})
 
         # for script
         if not soup.body:
