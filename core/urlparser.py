@@ -162,9 +162,11 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
     需要和原本列表中的所有url都不相似
     """
 
-    check_flag = True
     BANWORD_LAST_LIST = ['.htm', '.png', '.jpg', '.mp']
     BLACK_PATH_NAME = ['static', 'upload', 'docs', 'js', 'css', 'font', 'image']
+
+    check_flag = True
+    is_has_banword = False
 
     for origin_target in origin_target_list:
 
@@ -174,7 +176,6 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
         # false 是相似 true 是不想似
         check_flag_one = False
         is_diff_last = False
-        is_has_banword = False
 
         # 存在黑名单路径的数量
         black_path_count = black_path_count
@@ -188,6 +189,10 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
                 continue
             if m == 'B':
                 for black_path in BLACK_PATH_NAME:
+                    # 如果黑名单路径的链接太多，直接返回
+                    if is_has_banword:
+                        return False
+
                     if black_path in new_target_path[i]:
                         black_path_count += 1
 
@@ -204,7 +209,7 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
 
                         # 如果不同的只有最后一部分，那么这个路径下上限100条路由
                         if len(origin_target_list) > 100:
-                            check_flag_one = False
+                            return False
                         else:
                             check_flag_one = True
 
@@ -223,12 +228,12 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
 
             i += 1
 
-        # 如果最后一部分相同且不存在特殊字符
-        if new_target_path[-1] == origin_path[-1] and not check_flag_one and not is_has_banword:
-            is_diff_last = True
+        # # 如果最后一部分相同且不存在特殊字符
+        # if new_target_path[-1] == origin_path[-1] and not check_flag_one and not is_has_banword:
+        #     is_diff_last = True
 
-        # 参数重复判定
-        if not check_flag_one and is_diff_last:
+        # 如果前面判定相似，判定参数
+        if not check_flag_one:
             # 如果path判定相似，那么会进入参数重复判定
             origin_query = parse_qs(origin_target.query)
             new_target_query = parse_qs(new_target.query)
@@ -238,6 +243,10 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
 
             if (not origin_query and new_target_query) or (origin_query and not new_target_query):
                 # 如果一个有参数一个无参数那么不想似
+                check_flag_one = True
+
+            if len(origin_query) != len(new_target_query):
+                # 如果参数数量不同则不想似
                 check_flag_one = True
 
             for key in origin_query:

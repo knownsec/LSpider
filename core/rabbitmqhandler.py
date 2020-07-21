@@ -18,11 +18,12 @@ from LSpider.settings import RABBITMQ_USERNAME, RABBITMQ_PASSWORD
 
 
 class RabbitmqHandler:
-    def __init__(self):
+    def __init__(self, id=1):
         self.ip = RABBITMQ_IP
         self.port = RABBITMQ_PORT
         self.user = RABBITMQ_USERNAME
         self.password = RABBITMQ_PASSWORD
+        self.id = id
 
         self.link()
 
