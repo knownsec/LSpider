@@ -23,6 +23,7 @@ import traceback
 from urllib.parse import urlparse
 
 from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY, IS_OPEN_CHROME_PROXY
+from LSpider.settings import CHROME_DOWNLOAD_PATH
 from utils.base import random_string
 from utils.log import logger
 
@@ -69,7 +70,17 @@ class ChromeDriver:
         self.chrome_options.add_argument("--disable-web-security")
         self.chrome_options.add_argument("--disk-cache-size=1000")
 
-        prefs = {'profile.default_content_settings.popups': 0, 'download.default_directory': '/tmp'}
+        # for download path
+        try:
+            if os.path.exists(CHROME_DOWNLOAD_PATH):
+                os.mkdir(CHROME_DOWNLOAD_PATH)
+
+            chrome_downloadfile_path = CHROME_DOWNLOAD_PATH
+        except:
+            chrome_downloadfile_path = "./tmp"
+
+
+        prefs = {'profile.default_content_settings.popups': 0, 'download.default_directory': chrome_downloadfile_path}
         self.chrome_options.add_experimental_option('prefs', prefs)
 
         # proxy
