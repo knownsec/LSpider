@@ -105,7 +105,9 @@ def url_filter(target_list):
     BLACK_DOMAIN_NAME_LIST = ['docs', 'image', 'static']
 
     for domain in target_list:
+
         temp_list = {}
+        has_black_domain = False
         domain_list = target_list[domain]
 
         # 读数据库数据做聚合分析
@@ -114,9 +116,11 @@ def url_filter(target_list):
         # 如果存在黑名单词语的域名超过200条则跳过
         for BLACK_DOMAIN_NAME in BLACK_DOMAIN_NAME_LIST:
             if BLACK_DOMAIN_NAME in domain:
-                if len(database_urllist) > 200:
-                    logger.warning("[URL Filter] Domain {} has black word and more than 200.".format(domain))
-                    continue
+                has_black_domain = True
+
+        if has_black_domain and len(database_urllist) > 200:
+            logger.warning("[URL Filter] Domain {} has black word and more than 200.".format(domain))
+            continue
 
         for url in database_urllist:
             domain_list.append(urlparse(url.url))
