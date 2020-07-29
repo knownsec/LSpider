@@ -58,7 +58,8 @@ def url_parser(domain, target_list, deep=0, backend_cookies = ""):
         if target_domain not in pre_result_list:
             pre_result_list[target_domain] = []
 
-        pre_result_list[target_domain].append(parse_result)
+        # 新加入的链接作为键值对的键名, 0是指新加入的链接
+        pre_result_list[target_domain][parse_result] = 0
 
     # 总结结果
     temp_result_list = url_filter(pre_result_list)
@@ -123,7 +124,8 @@ def url_filter(target_list):
             continue
 
         for url in database_urllist:
-            domain_list.append(urlparse(url.url))
+            # 从数据库提取出来的链接，标志位是1
+            domain_list[urlparse(url.url)] = 1
 
         for target in domain_list:
 
@@ -148,7 +150,7 @@ def url_filter(target_list):
                 temp_list[flag] = [target]
 
             else:
-                if check_same(flag, temp_list[flag], target, black_path_count):
+                if check_same(flag, temp_list[flag], target, black_path_count) and domain_list[target] == 0:
                     # 直接存入url
                     temp_list[flag].append(target)
 
@@ -156,6 +158,8 @@ def url_filter(target_list):
         for flag in temp_list:
             result_list.extend(temp_list[flag])
 
+    # 去重
+    result_list = list(set(result_list))
     return result_list
 
 

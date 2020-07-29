@@ -150,9 +150,13 @@ class SpiderCoreBackend:
 
                         if IS_OPEN_RABBITMQ:
                             self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                            self.rabbitmq_handler.new_scan_target(json.dumps(
+                                {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
                         else:
                             self.target_list.put(
                                 {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
+                            self.target_list.put(
+                                {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
 
                         # 重设扫描时间
                         subdomain.lastscan = nowtime
