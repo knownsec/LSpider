@@ -12,7 +12,9 @@
 import re
 import time
 import requests
+import traceback
 from core.chromeheadless import ChromeDriver
+from utils.log import logger
 from LSpider.settings import HACKERONE_USERNAME, HACKERONE_PASSWORD
 
 from selenium.webdriver.common.keys import Keys
@@ -52,17 +54,23 @@ class HackeroneSpider:
         td_list = self.chromeclass.driver.find_elements_by_xpath("//td[@class='daisy-table__cell table__row--align-top break-word']")
 
         for td in td_list:
-            domain = td.find_element_by_tag_name("strong").text.strip()
 
-            url_list = td.find_element_by_tag_name('p').text
-            for url in url_list.split("\n"):
-                if url.startswith("/"):
-                    u = "http://" + domain + url.strip()
+            try:
+                domain = td.find_element_by_tag_name("strong").text.strip()
 
-                    # replace {} () <>
-                    u = re.sub(r'[({<][^)}>]*[)}>]', '1', u)
+                url_list = td.find_element_by_tag_name('p').text
+                for url in url_list.split("\n"):
+                    if url.startswith("/"):
+                        u = "http://" + domain + url.strip()
 
-                    result_list.append(u.replace("*.", ""))
+                        # replace {} () <>
+                        u = re.sub(r'[({<][^)}>]*[)}>]', '1', u)
+
+                        result_list.append(u.replace("*.", ""))
+
+            except:
+                logger.warnning("[Hackerone spider][parse] url data parse error. {}".format(traceback.format_exc()))
+                continue
 
         return result_list
 

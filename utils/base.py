@@ -61,6 +61,9 @@ def check_target(target_list):
 
             if '\n' in target:
                 for t in target.split('\n'):
+                    if "*." in t:
+                        t = t.replace('*.','').replace('..', '.')
+
                     if t.strip():
                         if t.strip().startswith("http://") or t.strip().startswith("https://"):
                             result.append(t.strip())
