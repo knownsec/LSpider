@@ -56,7 +56,7 @@ def url_parser(domain, target_list, deep=0, backend_cookies = ""):
             continue
 
         if target_domain not in pre_result_list:
-            pre_result_list[target_domain] = []
+            pre_result_list[target_domain] = {}
 
         # 新加入的链接作为键值对的键名, 0是指新加入的链接
         pre_result_list[target_domain][parse_result] = 0
