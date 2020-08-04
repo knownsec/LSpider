@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'web.index.apps.IndexConfig',
-    'web.spider.apps.SpiderConfig',
+    'web.index',
+    'web.spider',
+    'web.vultargetspider',
 ]
 
 MIDDLEWARE = [

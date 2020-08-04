@@ -10,7 +10,7 @@
 
 from django.core.management.base import BaseCommand
 
-from extra.hackerone import HackeroneSpider
+from web.vultargetspider.controller.hackerone import HackeroneSpider
 
 from utils.log import logger
 
