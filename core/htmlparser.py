@@ -74,7 +74,7 @@ def html_parser(content):
                 return result_list
 
             # match
-            for url in match_content('((ht|f)tps?)://[\w\-]+(\.[\w\-]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?', content):
+            for url in match_content('(((ht|f)tps?):\/\/)?[\w\-]+(\.[\w\-]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?', content):
                 result_list.append({"type": "link", "url": url})
             
 
