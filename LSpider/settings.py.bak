@@ -191,3 +191,13 @@ CHROME_PROXY = '127.0.0.1:7777'
 # for hackerone
 HACKERONE_USERNAME = ""
 HACKERONE_PASSWORD = ""
+
+# loghander
+LOGHANDER_IS_OPEN_WEIXIN = False
+
+# for weixin
+WECHAT_NOTICE = {
+    'corp_id': ' ',
+    'secret': ' ',
+    'agent_id': ' ',
+}
