@@ -101,7 +101,7 @@ class SpiderCoreBackend:
 
     def init_scan(self):
 
-        tasklist = ScanTask.objects.filter(is_active=True)
+        tasklist = ScanTask.objects.filter(is_active=True, is_finished=False)
         new_task = False
 
         for task in tasklist:
@@ -110,57 +110,60 @@ class SpiderCoreBackend:
             target_cookies = task.cookies
 
             if lastscantime:
-                if (nowtime - lastscantime).days > 90:
-                    # 1 mouth
-                    targets = check_target(task.target)
-                    target_type = task.target_type
-                    target_cookies = task.cookies
+                # if (nowtime - lastscantime).days > 90:
+                # 3 mouth
+                # 暂时改为单次扫描，每个任务标记并只扫描一次
 
-                    for target in targets:
+                targets = check_target(task.target)
+                target_type = task.target_type
+                target_cookies = task.cookies
 
-                        if IS_OPEN_RABBITMQ:
-                            self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
-                        else:
-                            self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
+                for target in targets:
 
-                        # subdomain scan
-                        domain = urlparse(target).netloc
+                    if IS_OPEN_RABBITMQ:
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
+                    else:
+                        self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
 
-                        if domain:
-                            PrescanCore().start(domain)
+                    # subdomain scan
+                    domain = urlparse(target).netloc
 
-                    # 重设扫描时间
-                    task.last_scan_time = nowtime
-                    task.save()
+                    if domain:
+                        PrescanCore().start(domain)
 
-                    # 每次只读一个任务，在一个任务后退出重启
-                    new_task = True
+                # 重设扫描时间
+                task.last_scan_time = nowtime
+                task.is_finished = True
+                task.save()
 
-            SubDomainlist = SubDomainList.objects.filter()
+                # 每次只读一个任务，在一个任务后退出重启
+                new_task = True
+
+            SubDomainlist = SubDomainList.objects.filter(is_finished=False)
 
             for subdomain in SubDomainlist:
                 lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
                 nowtime = datetime.datetime.now()
 
                 if lastscantime:
-                    if (nowtime - lastscantime).days > 30:
+                    # if (nowtime - lastscantime).days > 30:
 
-                        # 1 mouth
-                        target = subdomain.subdomain.strip()
+                    # 1 mouth
+                    target = subdomain.subdomain.strip()
 
-                        if IS_OPEN_RABBITMQ:
-                            self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
-                            self.rabbitmq_handler.new_scan_target(json.dumps(
-                                {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
-                        else:
-                            self.target_list.put(
-                                {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
-                            self.target_list.put(
-                                {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
+                    if IS_OPEN_RABBITMQ:
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                        self.rabbitmq_handler.new_scan_target(json.dumps(
+                            {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                    else:
+                        self.target_list.put(
+                            {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
+                        self.target_list.put(
+                            {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
 
-                        # 重设扫描时间
-                        subdomain.lastscan = nowtime
-                        subdomain.save()
+                    # 重设扫描时间
+                    subdomain.lastscan = nowtime
+                    subdomain.save()
 
             if new_task:
                 # 每次只读一个任务，在一个任务后退出重启

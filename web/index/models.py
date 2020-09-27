@@ -13,6 +13,7 @@ class ScanTask(models.Model):
     last_scan_time = models.DateTimeField()
     cookies = models.CharField(max_length=5000, default=None, null=True)
     is_active = models.BooleanField(default=False)
+    is_finished = models.BooleanField(default=False)
 
 
 class BanList(models.Model):
