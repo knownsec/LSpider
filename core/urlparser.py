@@ -28,12 +28,12 @@ def checkbanlist(domain):
     return False
 
 
-def url_parser(domain, target_list, deep=0, backend_cookies = ""):
+def url_parser(domain, target_list, deep=0, backend_cookies=""):
     """
     通过分割url来给url分类，并试图去重
     """
     origin_domain = urlparse(domain).netloc
-    pre_result_list = {}
+    pre_result_dict = {}
     temp_result_list = []
 
     result_list = []
@@ -55,14 +55,14 @@ def url_parser(domain, target_list, deep=0, backend_cookies = ""):
             logger.warning("[Spider][UrlParser] Find Bad Word in domain {}".format(parse_result.netloc))
             continue
 
-        if target_domain not in pre_result_list:
-            pre_result_list[target_domain] = {}
+        if target_domain not in pre_result_dict:
+            pre_result_dict[target_domain] = {}
 
         # 新加入的链接作为键值对的键名, 0是指新加入的链接
-        pre_result_list[target_domain][parse_result] = 0
+        pre_result_dict[target_domain][parse_result] = 0
 
     # 总结结果
-    temp_result_list = url_filter(pre_result_list)
+    temp_result_list = url_filter(pre_result_dict)
 
     for temp_result in temp_result_list:
 
@@ -109,7 +109,8 @@ def url_filter(target_list):
 
         temp_list = {}
         has_black_domain = False
-        domain_list = target_list[domain]
+        url_dict_list = target_list[domain]
+        origin_url_dict_list = []
 
         # 读数据库数据做聚合分析
         database_urllist = UrlTable.objects.filter(domain=domain)
@@ -125,9 +126,34 @@ def url_filter(target_list):
 
         for url in database_urllist:
             # 从数据库提取出来的链接，标志位是1
-            domain_list[urlparse(url.url)] = 1
+            origin_url_dict_list[urlparse(url.url)] = 1
 
-        for target in domain_list:
+        # 先使用database_urllist来构造已有的模板列表
+        for target in origin_url_dict_list:
+            # 路径重复判定处理
+            path_parsers = target.path.split('/')
+
+            # 用一个特殊的思路来处理
+            # 使用A来代表纯数字，B来代表字符串
+            # 如果两个链接中只有A相同，那么则相似
+            # 如果只有B相同，则认为不相似
+            flag = ""
+
+            for path_par in path_parsers:
+
+                if re.search('^\d+$', path_par):
+                    flag += 'A'
+
+                else:
+                    flag += 'B'
+
+            if flag not in temp_list:
+                temp_list[flag] = [target]
+            else:
+                temp_list[flag].append(target)
+
+        # 然后遍历与temp_list做对比
+        for target in url_dict_list:
 
             # 路径重复判定处理
             path_parsers = target.path.split('/')
@@ -150,7 +176,7 @@ def url_filter(target_list):
                 temp_list[flag] = [target]
 
             else:
-                if check_same(flag, temp_list[flag], target, black_path_count) and domain_list[target] == 0:
+                if check_same(flag, temp_list[flag], target, black_path_count):
                     # 直接存入url
                     temp_list[flag].append(target)
 
