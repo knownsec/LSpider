@@ -44,7 +44,7 @@ New vuls:\n
                 for key in received_json_data:
 
                     if key == 'plugin':
-                        if received_json_data[key] in ['dirscan']:
+                        if received_json_data[key] in ['dirscan', 'brute_force']:
                             return HttpResponse("Success Webhook.")
 
                     if type(received_json_data[key]) is dict:

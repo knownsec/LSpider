@@ -44,6 +44,7 @@ class SpiderCoreBackend:
     def __init__(self):
         # 任务与线程分发
         self.target_list = Queue()
+        self.emergency_target_list = Queue()
         self.threadpool = ThreadPool()
 
         # rabbitmq init
@@ -55,9 +56,10 @@ class SpiderCoreBackend:
         time.sleep(3)
 
         # 如果队列为空，那么直接跳出
-        if IS_OPEN_RABBITMQ and not self.rabbitmq_handler.get_scan_ready_count():
-            logger.info("[Spider Core] Spider Target Queue is empty.")
-            return
+        if IS_OPEN_RABBITMQ:
+            if not self.rabbitmq_handler.get_scan_ready_count() and not self.rabbitmq_handler.get_emergency_scan_ready_count():
+                logger.info("[Spider Core] Spider Target Queue is empty.")
+                return
 
         if not IS_OPEN_RABBITMQ and self.target_list.empty():
             logger.info("[Spider Core] Spider Target Queue is empty.")
@@ -67,14 +69,30 @@ class SpiderCoreBackend:
 
         if IS_OPEN_RABBITMQ:
             left_tasks = self.rabbitmq_handler.get_scan_ready_count()
+            left_emergency_tasks = self.rabbitmq_handler.get_emergency_scan_ready_count()
         else:
             left_tasks = self.target_list.qsize()
+            left_emergency_tasks = self.emergency_target_list.qsize()
 
         logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, left_tasks))
+        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
 
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续
         i = 0
+
+        # 启动两个线程用于紧急任务
+        while i < 2:
+            i += 1
+            spidercore = SpiderCore(self.emergency_target_list)
+
+            logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
+
+            if IS_OPEN_RABBITMQ:
+                self.threadpool.new(spidercore.scancore, args=(True,))
+            else:
+                self.threadpool.new(spidercore.scan_for_queue)
+            time.sleep(0.5)
 
         while 1:
             while self.threadpool.get_free_num():
@@ -107,36 +125,45 @@ class SpiderCoreBackend:
         for task in tasklist:
             lastscantime = datetime.datetime.strptime(str(task.last_scan_time)[:19], "%Y-%m-%d %H:%M:%S")
             nowtime = datetime.datetime.now()
-            target_cookies = task.cookies
 
-            if lastscantime:
+            # if lastscantime:
                 # if (nowtime - lastscantime).days > 90:
                 # 3 mouth
                 # 暂时改为单次扫描，每个任务标记并只扫描一次
 
-                targets = check_target(task.target)
-                target_type = task.target_type
-                target_cookies = task.cookies
+            targets = check_target(task.target)
+            target_type = task.target_type
+            target_cookies = task.cookies
+            task_is_emergency = task.is_emergency
 
-                for target in targets:
+            for target in targets:
 
-                    if IS_OPEN_RABBITMQ:
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
+                if IS_OPEN_RABBITMQ:
+                    if task_is_emergency:
+                        self.rabbitmq_handler.new_emergency_scan_target(
+                            json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
                     else:
-                        self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
+                else:
+                    self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
 
-                    # subdomain scan
-                    domain = urlparse(target).netloc
+                # subdomain scan
+                domain = urlparse(target).netloc
 
-                    if domain:
-                        PrescanCore().start(domain)
+                if domain:
+                    PrescanCore().start(domain)
 
-                # 重设扫描时间
-                task.last_scan_time = nowtime
-                task.is_finished = True
-                task.save()
+            # 重设扫描时间
+            task.last_scan_time = nowtime
+            task.is_emergency = False
+            task.is_finished = True
+            task.save()
 
-                # 每次只读一个任务，在一个任务后退出重启
+            # 每次只读一个任务，在一个任务后退出重启
+            # 紧急任务不影响到普通任务
+            if task_is_emergency:
+                new_task = False
+            else:
                 new_task = True
 
             SubDomainlist = SubDomainList.objects.filter(is_finished=False)
@@ -152,9 +179,16 @@ class SpiderCoreBackend:
                     target = subdomain.subdomain.strip()
 
                     if IS_OPEN_RABBITMQ:
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
-                        self.rabbitmq_handler.new_scan_target(json.dumps(
-                            {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                        if task_is_emergency:
+                            self.rabbitmq_handler.new_emergency_scan_target(json.dumps(
+                                {'url': "http://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                            self.rabbitmq_handler.new_emergency_scan_target(json.dumps(
+                                {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+
+                        else:
+                            self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                            self.rabbitmq_handler.new_scan_target(json.dumps(
+                                {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
                     else:
                         self.target_list.put(
                             {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
@@ -188,10 +222,14 @@ class SpiderCore:
         self.scan_id = get_now_scan_id()
         self.i = 1
 
-    def scancore(self):
+    def scancore(self, is_emergency=False):
         # start
-        logger.info("[Scan Core] Scan Task start:>")
-        self.rabbitmq_handler.start_scan_target(self.scan_task_distribute)
+        if is_emergency:
+            logger.info("[Scan Core] Emergency Scan Task start:>")
+            self.rabbitmq_handler.start_emergency_scan_target(self.scan_emergency_task_distribute)
+        else:
+            logger.info("[Scan Core] Scan Task start:>")
+            self.rabbitmq_handler.start_scan_target(self.scan_task_distribute)
 
     def scan_task_distribute(self, channel, method, header, message):
 
@@ -229,6 +267,42 @@ class SpiderCore:
             time.sleep(0.5)
             return False
 
+    def scan_emergency_task_distribute(self, channel, method, header, message):
+
+        # self.i += 1
+        # if self.i > 10000:
+        #     channel.basic_cancel(channel, nowait=False)
+        #     # after target list finish
+        #     self.req.close_driver()
+        #     return False
+
+        # 确认收到消息
+        channel.basic_ack(delivery_tag=method.delivery_tag)
+
+        try:
+            # 获取任务信息
+            task = json.loads(message)
+
+            if checkbanlist(task['url']):
+                logger.debug(("[Scan] ban domain exist...continue"))
+                return False
+
+            self.scan(task, is_emergency=True)
+        except json.decoder.JSONDecodeError:
+            task = eval(message)
+
+            if checkbanlist(task['url']):
+                logger.debug(("[Scan] ban domain exist...continue"))
+                return False
+
+            self.scan(task, is_emergency=True)
+
+        except:
+            # 任务启动错误则把任务重新插回去
+            self.rabbitmq_handler.new_emergency_scan_target(message)
+            time.sleep(0.5)
+            return False
+
     def scan_for_queue(self):
 
         i = 0
@@ -256,7 +330,7 @@ class SpiderCore:
                 logger.warning('[Scan] something error, {}'.format(traceback.format_exc()))
                 raise
 
-    def scan(self, target):
+    def scan(self, target, is_emergency=False):
         i = 0
 
         try:
@@ -288,7 +362,10 @@ class SpiderCore:
 
                 # save to rabbitmq
                 if IS_OPEN_RABBITMQ:
-                    self.rabbitmq_handler.new_scan_target(json.dumps(target))
+                    if is_emergency:
+                        self.rabbitmq_handler.new_emergency_scan_target(json.dumps(target))
+                    else:
+                        self.rabbitmq_handler.new_scan_target(json.dumps(target))
                 else:
                     self.target_list.put(target)
 
