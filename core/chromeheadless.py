@@ -24,8 +24,16 @@ from urllib.parse import urlparse
 
 from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY, IS_OPEN_CHROME_PROXY
 from LSpider.settings import CHROME_DOWNLOAD_PATH
-from utils.base import random_string
 from utils.log import logger
+
+
+def random_string(length=8):
+    seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+=-"
+    sa = []
+    for i in range(length):
+        sa.append(random.choice(seed))
+    salt = ''.join(sa)
+    return salt
 
 
 class ChromeDriver:
@@ -58,7 +66,7 @@ class ChromeDriver:
     def init_object(self):
 
         self.chrome_options = webdriver.ChromeOptions()
-        self.chrome_options.add_argument('--headless')
+        # self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_argument('--no-sandbox')
         self.chrome_options.add_argument('--disable-images')
@@ -120,12 +128,18 @@ class ChromeDriver:
                 self.driver.implicitly_wait(10)
                 self.driver.get(url)
 
+            # else:
+            # 检查是否是登录界面
+            if self.check_login():
+                logger.info("[ChromeHeadless] Page {} need login.".format(url))
+                return 2, True
+
             if isclick:
                 if not self.click_page():
                     self.driver.implicitly_wait(10)
                     self.driver.get(url)
 
-            return self.driver.page_source
+            return 1, self.driver.page_source
 
         except selenium.common.exceptions.InvalidSessionIdException:
             logger.warning("[ChromeHeadless]Chrome Headless quit unexpectedly..")
@@ -134,28 +148,28 @@ class ChromeDriver:
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, cookies, times + 1, isclick)
-            return False
+            return -1, False
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
             if times > 0:
-                return False
+                return -1, False
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, cookies, times+1, isclick)
-            return False
+            return -1, False
 
         except selenium.common.exceptions.InvalidCookieDomainException:
             logger.warning("[ChromeHeadless]Chrome Headless request with cookie error..{}".format(url))
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, None, times + 1, isclick)
-            return False
+            return -1, False
 
         except selenium.common.exceptions.InvalidArgumentException:
             logger.warning("[ChromeHeadless]Request error...{}".format(url))
             logger.warning("[ChromeHeadless]{}".format(traceback.format_exc()))
-            return False
+            return -1, False
 
     def add_cookie(self, cookies):
 
@@ -299,6 +313,71 @@ class ChromeDriver:
             logger.warning("[ChromeHeadless][Click Page] No Such Element")
             return
 
+    def check_login(self):
+        """
+        检查当前页面是否有登录框
+        :return:
+        """
+        try:
+            is_has_login_form = False
+            is_has_login_button = False
+            is_has_login_input = False
+
+            forms = self.driver.find_elements_by_tag_name('form')
+            forms_len = len(forms)
+
+            if not forms:
+                is_has_login_form = False
+
+            for i in range(forms_len):
+                form = forms[i]
+
+                for key in ['login', '登录', 'sign', '用户名', 'user', 'pass', '用户名']:
+                    if key in form.text:
+                        is_has_login_form = True
+
+            buttons = self.driver.find_elements_by_tag_name('button')
+            buttons_len = len(buttons)
+
+            if not buttons:
+                is_has_login_button = False
+
+            for i in range(buttons_len):
+                button = buttons[i]
+
+                if button.is_enabled() and button.is_displayed():
+
+                    for key in ['login', 'sign', 'user', 'pass']:
+                        if key in button.get_attribute('innerHTML'):
+                            is_has_login_button = True
+            inputs = self.driver.find_elements_by_tag_name('input')
+            inputs_len = len(inputs)
+
+            if not inputs:
+                is_has_login_input = False
+
+            for i in range(inputs_len):
+                input = inputs[i]
+
+                if input.is_enabled() and input.is_displayed():
+
+                    for key in ['login', 'sign', 'user', 'pass']:
+                        if key in input.get_attribute('innerHTML'):
+                            is_has_login_input = True
+
+            if is_has_login_button or is_has_login_form or is_has_login_input:
+                return True
+            else:
+                return False
+
+        except selenium.common.exceptions.NoSuchElementException:
+            logger.warning("[ChromeHeadless][Click Page] No Such Element")
+            return
+
+        except:
+            logger.error("[ChromeHeadless] Bad check...{}".format(traceback.format_exc()))
+            return False
+
     def check_host(self):
         origin = urlparse(self.origin_url)
         now = urlparse(self.driver.current_url)
@@ -313,13 +392,13 @@ class ChromeDriver:
         # self.driver.close()
         time.sleep(1)
 
-    def __del__(self):
-        self.close_driver()
+    # def __del__(self):
+        # self.close_driver()
 
 
 if __name__ == "__main__":
     Req = ChromeDriver()
 
-    Req.get_resp("https://lightless.me")
+    Req.get_resp("http://152.136.99.52/phpmyadmin_s3cr3t/sql.php?server=1&db=lspider&table=spider_subdomainlist&pos=0", isclick=False)
 
     # print(Req.get_resp("https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"))

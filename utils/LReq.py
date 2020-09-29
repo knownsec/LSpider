@@ -169,7 +169,7 @@ class LReq:
 
         r = self.s.get(url, headers=self.get_header(url, cookies), timeout=3)
 
-        return r.content
+        return 1, r.content
 
     def getRespByChrome(self, url, cookies):
         url = self.check_url(url)
@@ -185,7 +185,7 @@ class LReq:
 
         r = self.s.post(url, data=data, headers=self.get_header(url, cookies), timeout=3)
 
-        return r.content
+        return 1, r.content
 
     def postJsonResp(self, url, data, cookies):
         url = self.check_url(url)
@@ -197,7 +197,7 @@ class LReq:
 
         r = self.s.post(url, data=json.dumps(data), headers=header, timeout=3)
 
-        return r.content
+        return 1, r.content
 
     def close_driver(self):
         self.cs.close_driver()

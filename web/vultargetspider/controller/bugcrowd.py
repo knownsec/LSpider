@@ -33,7 +33,7 @@ class BugcrowdSpider:
     def spider(self, appname):
         url = self.url + appname
 
-        content = self.chromeclass.get_resp(url, isclick=False)
+        code, content = self.chromeclass.get_resp(url, isclick=False)
         time.sleep(5)
 
         result = self.html_parse()

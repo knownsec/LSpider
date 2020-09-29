@@ -12,12 +12,17 @@
 from utils.log import logger
 from wechatpy.enterprise import WeChatClient
 from LSpider.settings import LOGHANDER_IS_OPEN_WEIXIN
-from LSpider.settings import WECHAT_NOTICE
+from LSpider.settings import WECHAT_NOTICE, WECHAT_NOTICE_DEBUG
 
 
 enterprise = WeChatClient(
     corp_id=WECHAT_NOTICE['corp_id'],
     secret=WECHAT_NOTICE['secret'],
+)
+
+enterprise_debug = WeChatClient(
+    corp_id=WECHAT_NOTICE_DEBUG['corp_id'],
+    secret=WECHAT_NOTICE_DEBUG['secret'],
 )
 
 
@@ -32,7 +37,7 @@ def send_text(content):
 
 
 def send_text_admin(content):
-    enterprise.message.send_text(
+    enterprise_debug.message.send_text(
         agent_id=WECHAT_NOTICE['agent_id'],
         user_ids='guoyingqi0',
         tag_ids='',
@@ -68,6 +73,10 @@ User {user} Attention, {message}
 
             else:
                 send_text(message)
+
+    def debug_message(self, message):
+        if self.is_weixin:
+            send_text_admin(message)
 
 
 ReMess = LogHandlerClass(is_weixin=LOGHANDER_IS_OPEN_WEIXIN)

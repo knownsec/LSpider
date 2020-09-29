@@ -22,3 +22,16 @@ class BanList(models.Model):
     ban_domain = models.CharField(max_length=100)
     is_active = models.BooleanField(default=False)
 
+
+class AccountDataTable(models.Model):
+    domain = models.CharField(max_length=200)
+    username = models.CharField(max_length=200, null=True)
+    password = models.CharField(max_length=200, null=True)
+    iphone = models.CharField(max_length=50, null=True)
+    cookies = models.TextField(null=True)
+
+
+class LoginPageList(models.Model):
+    domain = models.CharField(max_length=200)
+    url = models.CharField(max_length=1000)
+    is_active = models.BooleanField(default=True)

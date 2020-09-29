@@ -27,6 +27,7 @@ from core.htmlparser import html_parser
 from core.urlparser import url_parser, checkbanlist
 from core.threadingpool import ThreadPool
 from core.rabbitmqhandler import RabbitmqHandler
+from core.domainauthcheck import check_login_or_get_cookie
 
 from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ
 from LSpider.settings import IS_OPEN_CHROME_PROXY, CHROME_PROXY
@@ -338,18 +339,32 @@ class SpiderCore:
             time.sleep(self.req.get_timeout())
 
             # target = self.target_list.get(False)
+            code = -1
             content = False
+            backend_cookies = ""
 
             if target['type'] == 'link':
-                content = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
+                code, content = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
             if target['type'] == 'js':
-                content = self.req.get(target['url'], 'Resp', 0, target['cookies'])
+                code, content = self.req.get(target['url'], 'Resp', 0, target['cookies'])
 
-            if not content:
+            if code == -1:
                 return
 
-            backend_cookies = target['cookies']
+            if code == 2:
+                # 代表这个页面需要登录
+                backend_cookies = check_login_or_get_cookie(target['url'])
+
+                # 任务塞到加急队列中
+                new_target = target
+                new_target['cookies'] = backend_cookies
+
+                self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
+
+                return
+            else:
+                backend_cookies = target['cookies']
 
             result_list = html_parser(content)
             result_list = url_parser(target['url'], result_list, target['deep'], backend_cookies)
