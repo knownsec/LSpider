@@ -132,14 +132,14 @@ class ChromeDriver:
             # 检查是否是登录界面
             if self.check_login():
                 logger.info("[ChromeHeadless] Page {} need login.".format(url))
-                return 2, True
+                return 2, True, ""
 
             if isclick:
                 if not self.click_page():
                     self.driver.implicitly_wait(10)
                     self.driver.get(url)
 
-            return 1, self.driver.page_source
+            return 1, self.driver.page_source, self.driver.title
 
         except selenium.common.exceptions.InvalidSessionIdException:
             logger.warning("[ChromeHeadless]Chrome Headless quit unexpectedly..")
@@ -148,28 +148,28 @@ class ChromeDriver:
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, cookies, times + 1, isclick)
-            return -1, False
+            return -1, False, ""
 
         except selenium.common.exceptions.TimeoutException:
             logger.warning("[ChromeHeadless]Chrome Headless request timeout..{}".format(url))
             if times > 0:
-                return -1, False
+                return -1, False, ""
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, cookies, times+1, isclick)
-            return -1, False
+            return -1, False, ""
 
         except selenium.common.exceptions.InvalidCookieDomainException:
             logger.warning("[ChromeHeadless]Chrome Headless request with cookie error..{}".format(url))
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
             self.get_resp(url, None, times + 1, isclick)
-            return -1, False
+            return -1, False, ""
 
         except selenium.common.exceptions.InvalidArgumentException:
             logger.warning("[ChromeHeadless]Request error...{}".format(url))
             logger.warning("[ChromeHeadless]{}".format(traceback.format_exc()))
-            return -1, False
+            return -1, False, ""
 
     def add_cookie(self, cookies):
 

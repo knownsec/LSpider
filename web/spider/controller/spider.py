@@ -342,12 +342,13 @@ class SpiderCore:
             code = -1
             content = False
             backend_cookies = ""
+            title = ""
 
             if target['type'] == 'link':
-                code, content = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
+                code, content, title = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
             if target['type'] == 'js':
-                code, content = self.req.get(target['url'], 'Resp', 0, target['cookies'])
+                code, content, title = self.req.get(target['url'], 'Resp', 0, target['cookies'])
 
             if code == -1:
                 return
@@ -365,6 +366,15 @@ class SpiderCore:
                 return
             else:
                 backend_cookies = target['cookies']
+
+                # 如果为deep=0
+                # 那么记录title
+                if target['deep'] == 0:
+                    domain = urlparse(target['url']).netloc
+
+                    sd = SubDomainList.objects.filter(subdomain=domain).first()
+                    sd.title = title
+                    sd.save()
 
             result_list = html_parser(content)
             result_list = url_parser(target['url'], result_list, target['deep'], backend_cookies)
