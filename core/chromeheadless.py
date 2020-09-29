@@ -20,6 +20,7 @@ from selenium.common.exceptions import WebDriverException
 
 import os
 import traceback
+import random
 from urllib.parse import urlparse
 
 from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY, IS_OPEN_CHROME_PROXY
@@ -246,6 +247,52 @@ class ChromeDriver:
                 logger.warning("[ChromeHeadless][Click Page] No Such Element")
                 return
 
+    def smart_input(self, input):
+        """
+        简单的智能表单填充
+        :param input:
+        :return:
+        """
+
+        # user
+        if key in ['user', '用户名', 'name']:
+            if key in input.get_attribute('innerHTML'):
+                input.send_keys('admin')
+                return
+
+        # pass
+        if key in ['pass', 'pwd', '密码']:
+            if key in input.get_attribute('innerHTML'):
+                input.send_keys('123456')
+                return
+
+        # email
+        if key in ['email']:
+            if key in input.get_attribute('innerHTML'):
+                input.send_keys('{}@{}.com'.format(random_string(4), random_string(4)))
+                return
+
+        # phone
+        if key in ['phone']:
+            if key in input.get_attribute('innerHTML'):
+                input.send_keys('{}'.format(random.randint(13000000000, 14000000000)))
+                return
+
+        # address
+        if key in ['address', 'street']:
+            if key in input.get_attribute('innerHTML'):
+                input.send_keys('4492 Garfield Road')
+                return
+
+        # checkbox
+        if input.get_attribute('type') == 'checkbox':
+            input.click()
+
+        if input.get_attribute('type') == 'radio':
+            input.click()
+
+        return
+
     def click_button(self):
 
         try:
@@ -259,7 +306,7 @@ class ChromeDriver:
                 try:
                     input = inputs[i]
 
-                    input.send_keys(random_string())
+                    self.smart_input(input)
 
                 except selenium.common.exceptions.ElementNotInteractableException:
                     logger.warning("[ChromeHeadless][Click button] error interact")
@@ -332,7 +379,7 @@ class ChromeDriver:
             for i in range(forms_len):
                 form = forms[i]
 
-                for key in ['login', '登录', 'sign', '用户名', 'user', 'pass', '用户名']:
+                for key in ['login', '登录', 'sign', '用户名', 'user', 'pass', '用户名', 'pwd', 'phone']:
                     if key in form.text:
                         is_has_login_form = True
 

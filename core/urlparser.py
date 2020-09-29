@@ -110,7 +110,7 @@ def url_filter(target_list):
         temp_list = {}
         has_black_domain = False
         url_dict_list = target_list[domain]
-        origin_url_dict_list = []
+        origin_url_dict_list = {}
 
         # 读数据库数据做聚合分析
         database_urllist = UrlTable.objects.filter(domain=domain)
