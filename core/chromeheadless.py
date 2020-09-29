@@ -392,8 +392,8 @@ class ChromeDriver:
         # self.driver.close()
         time.sleep(1)
 
-    # def __del__(self):
-        # self.close_driver()
+    def __del__(self):
+        self.close_driver()
 
 
 if __name__ == "__main__":
