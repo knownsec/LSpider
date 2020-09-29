@@ -291,6 +291,8 @@ class ChromeDriver:
         if input.get_attribute('type') == 'radio':
             input.click()
 
+        input.send_keys(random_string())
+
         return
 
     def click_button(self):
