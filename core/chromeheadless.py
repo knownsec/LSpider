@@ -381,7 +381,7 @@ class ChromeDriver:
             for i in range(forms_len):
                 form = forms[i]
 
-                for key in ['login', '登录', 'sign', '用户名', 'user', 'pass', '用户名', 'pwd', 'phone']:
+                for key in ['login', '登录', 'sign', '用户名', 'user', 'pass', '用户名', 'pwd', 'phone', '注册']:
                     if key in form.text:
                         is_has_login_form = True
 
@@ -410,7 +410,7 @@ class ChromeDriver:
 
                 if input.is_enabled() and input.is_displayed():
 
-                    for key in ['login', 'sign', 'user', 'pass']:
+                    for key in ['login', 'sign', 'user', 'pass', 'account', 'phone', '手机']:
                         if key in input.get_attribute('innerHTML'):
                             is_has_login_input = True
 

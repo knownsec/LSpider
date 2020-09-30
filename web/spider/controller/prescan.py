@@ -59,7 +59,7 @@ class PrescanCore:
                     continue
 
                 if issave:
-                    s1 = SubDomainList(subdomain=subdomain, lastscan='1970-01-01 01:01:01')
+                    s1 = SubDomainList(subdomain=subdomain, lastscan='1970-01-01 01:01:01', is_finished=False)
                     s1.save()
 
         logger.info("[Pre Scan] domain {} find Sub-domain {}".format(domain, self.result_list))
