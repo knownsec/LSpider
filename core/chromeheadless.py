@@ -255,31 +255,31 @@ class ChromeDriver:
         """
 
         # user
-        if key in ['user', '用户名', 'name']:
+        for key in ['user', '用户名', 'name']:
             if key in input.get_attribute('innerHTML'):
                 input.send_keys('admin')
                 return
 
         # pass
-        if key in ['pass', 'pwd', '密码']:
+        for key in ['pass', 'pwd', '密码']:
             if key in input.get_attribute('innerHTML'):
                 input.send_keys('123456')
                 return
 
         # email
-        if key in ['email']:
+        for key in ['email']:
             if key in input.get_attribute('innerHTML'):
                 input.send_keys('{}@{}.com'.format(random_string(4), random_string(4)))
                 return
 
         # phone
-        if key in ['phone']:
+        for key in ['phone']:
             if key in input.get_attribute('innerHTML'):
                 input.send_keys('{}'.format(random.randint(13000000000, 14000000000)))
                 return
 
         # address
-        if key in ['address', 'street']:
+        for key in ['address', 'street']:
             if key in input.get_attribute('innerHTML'):
                 input.send_keys('4492 Garfield Road')
                 return
