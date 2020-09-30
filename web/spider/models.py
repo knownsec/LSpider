@@ -7,7 +7,7 @@ from django.db import models
 class SubDomainList(models.Model):
     subdomain = models.CharField(max_length=200)
     title = models.CharField(max_length=1000, null=True, default="")
-    banner = models.CharField(max_length=1000)
+    banner = models.CharField(max_length=1000, null=True, default="")
     lastscan = models.DateTimeField()
     is_finished = models.BooleanField(default=False)
 
