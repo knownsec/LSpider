@@ -81,7 +81,7 @@ class RabbitmqHandler:
         # 防止queue不存在，新建queue
         queue = self.emergency_scan_target_channel.queue_declare(queue="emergency_scantarget", durable=True)
         # 绑定queue和exchange
-        self.emergency_scan_target_channel.queue_bind(exchange="emergency_scantarget", queue="scantarget", routing_key="emergency_scantarget")
+        self.emergency_scan_target_channel.queue_bind(exchange="emergency_scantarget", queue="emergency_scantarget", routing_key="emergency_scantarget")
 
         return queue
 
@@ -110,22 +110,30 @@ class RabbitmqHandler:
         return True
 
     def get_scan_ready_count(self):
+        try:
+            queue = self.check_link_and_bind_scan()
 
-        queue = self.check_link_and_bind_scan()
+            if self.conn_broker.is_closed or self.scan_target_channel.is_closed:
+                return 0
 
-        if self.conn_broker.is_closed or self.scan_target_channel.is_closed:
+            return queue.method.message_count
+
+        except pika.exceptions.StreamLostError:
+            logger.error("[Rabbitmq] Scan consum transport error.")
             return 0
-
-        return queue.method.message_count
 
     def get_emergency_scan_ready_count(self):
+        try:
+            queue = self.check_emergency_link_and_bind_scan()
 
-        queue = self.check_emergency_link_and_bind_scan()
+            if self.conn_broker.is_closed or self.emergency_scan_target_channel.is_closed:
+                return 0
 
-        if self.conn_broker.is_closed or self.emergency_scan_target_channel.is_closed:
+            return queue.method.message_count
+
+        except pika.exceptions.StreamLostError:
+            logger.error("[Rabbitmq] Scan consum transport error.")
             return 0
-
-        return queue.method.message_count
 
     # def new_message(self, msg):
     #
@@ -176,7 +184,7 @@ class RabbitmqHandler:
         try:
             self.scan_target_channel.start_consuming()
         except pika.exceptions.StreamLostError:
-            logger.error("[Rabbitmq] Scan consum tranport error.")
+            logger.error("[Rabbitmq] Scan consum transport error.")
             return False
 
     def start_emergency_scan_target(self, fallback):
@@ -194,5 +202,5 @@ class RabbitmqHandler:
         try:
             self.emergency_scan_target_channel.start_consuming()
         except pika.exceptions.StreamLostError:
-            logger.error("[Rabbitmq] Scan consum tranport error.")
+            logger.error("[Rabbitmq] Scan consum transport error.")
             return False
