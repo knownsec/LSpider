@@ -19,6 +19,7 @@ class WebhookView(View):
     """
     授权模块
     """
+
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
@@ -62,10 +63,14 @@ New vuls:\n
             else:
                 if time.time() % 3600 < 10:
                     # 每小时提醒一次
-                    received_data = """
-每时通报\n
-{}
-""".format(received_json_data)
+                    received_data = """每时通报
+扫描发现的url数量: {},
+还没有扫描的url数量: {},
+最近30s请求失败率: {}
+""".format(received_json_data['num_found_urls'],
+           int(received_json_data['num_found_urls']) - int(received_json_data['num_scanned_urls']),
+           received_json_data['ratio_failed_http_requests'],
+           )
                 else:
                     return HttpResponse("Success Webhook.")
 
