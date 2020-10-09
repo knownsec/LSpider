@@ -109,6 +109,7 @@ def url_filter(target_list):
     for domain in target_list:
 
         temp_list = {}
+        new_temp_list = {}
         has_black_domain = False
         url_dict_list = target_list[domain]
         origin_url_dict_list = {}
@@ -175,15 +176,16 @@ def url_filter(target_list):
 
             if flag not in temp_list:
                 temp_list[flag] = [target]
-
+                new_temp_list[flag] = [target]
             else:
                 if check_same(flag, temp_list[flag], target, black_path_count):
                     # 直接存入url
                     temp_list[flag].append(target)
+                    new_temp_list[flag].append(target)
 
         # merge result
-        for flag in temp_list:
-            result_list.extend(temp_list[flag])
+        for flag in new_temp_list:
+            result_list.extend(new_temp_list[flag])
 
     # 去重
     result_list = list(set(result_list))
