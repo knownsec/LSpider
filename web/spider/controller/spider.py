@@ -167,9 +167,9 @@ class SpiderCoreBackend:
             else:
                 new_task = True
 
-            SubDomainlist = SubDomainList.objects.filter(is_finished=False)
+            subdomainlist = SubDomainList.objects.filter(is_finished=False)
 
-            for subdomain in SubDomainlist:
+            for subdomain in subdomainlist:
                 lastscantime = datetime.datetime.strptime(str(subdomain.lastscan)[:19], "%Y-%m-%d %H:%M:%S")
                 nowtime = datetime.datetime.now()
 

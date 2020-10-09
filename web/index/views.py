@@ -60,7 +60,7 @@ New vuls:\n
                         received_data += "{}: {}\n".format(key, received_json_data[key])
 
             else:
-                if time.time() % 3600 < 2:
+                if time.time() % 3600 < 10:
                     # 每小时提醒一次
                     received_data = """
 每时通报\n

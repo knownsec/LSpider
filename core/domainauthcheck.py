@@ -65,9 +65,9 @@ Url: {}
 
             if not lp:
                 ReMess.debug_message("""New Login Page:
-            Domain: {}
-            Url: {}
-            """.format(domain, url))
+Domain: {}
+Url: {}
+""".format(domain, url))
 
                 nlp = LoginPageList(domain=domain, url=url)
                 nlp.save()

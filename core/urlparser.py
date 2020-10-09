@@ -37,7 +37,7 @@ def url_parser(domain, target_list, deep=0, backend_cookies=""):
     temp_result_list = []
 
     result_list = []
-
+    print(target_list)
     for target in target_list:
 
         parse_result = urlparse(target['url'])
@@ -62,7 +62,10 @@ def url_parser(domain, target_list, deep=0, backend_cookies=""):
         pre_result_dict[target_domain][parse_result] = 0
 
     # 总结结果
+    print(pre_result_dict)
     temp_result_list = url_filter(pre_result_dict)
+
+    print(temp_result_list)
 
     for temp_result in temp_result_list:
 
@@ -103,7 +106,7 @@ def url_filter(target_list):
     black_path_count = 0
 
     # 黑名单域名
-    BLACK_DOMAIN_NAME_LIST = ['docs', 'image', 'static']
+    BLACK_DOMAIN_NAME_LIST = ['docs', 'image', 'static', 'blogs']
 
     for domain in target_list:
 
