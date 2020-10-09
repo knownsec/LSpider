@@ -63,8 +63,6 @@ def url_parser(origin, target_list, deep=0, backend_cookies=""):
     # 总结结果
     temp_result_list = url_filter(pre_result_dict)
 
-    print(temp_result_list)
-
     for temp_result in temp_result_list:
 
         if temp_result.geturl():
@@ -151,8 +149,10 @@ def url_filter(target_list):
 
             if flag not in temp_list:
                 temp_list[flag] = [target]
+                new_temp_list[flag] = []
             else:
                 temp_list[flag].append(target)
+                new_temp_list[flag] = []
 
         # 然后遍历与temp_list做对比
         for target in url_dict_list:
