@@ -28,16 +28,15 @@ def checkbanlist(domain):
     return False
 
 
-def url_parser(domain, target_list, deep=0, backend_cookies=""):
+def url_parser(origin, target_list, deep=0, backend_cookies=""):
     """
     通过分割url来给url分类，并试图去重
     """
-    origin_domain = urlparse(domain).netloc
+    origin_domain = urlparse(origin).netloc
     pre_result_dict = {}
     temp_result_list = []
 
     result_list = []
-    print(target_list)
     for target in target_list:
 
         parse_result = urlparse(target['url'])
@@ -51,7 +50,7 @@ def url_parser(domain, target_list, deep=0, backend_cookies=""):
             continue
 
         # check domain
-        if checkbanlist(parse_result.netloc):
+        if checkbanlist(target['url']):
             logger.warning("[Spider][UrlParser] Find Bad Word in domain {}".format(parse_result.netloc))
             continue
 
@@ -62,7 +61,6 @@ def url_parser(domain, target_list, deep=0, backend_cookies=""):
         pre_result_dict[target_domain][parse_result] = 0
 
     # 总结结果
-    print(pre_result_dict)
     temp_result_list = url_filter(pre_result_dict)
 
     print(temp_result_list)
@@ -75,7 +73,7 @@ def url_parser(domain, target_list, deep=0, backend_cookies=""):
                 request_url = temp_result.geturl()
 
             else:
-                request_url = urljoin(domain, temp_result.path)
+                request_url = urljoin(origin, temp_result.path)
 
             result_list.append({'url': request_url.strip(), 'type': 'link', 'cookies': backend_cookies, 'deep': deep + 1})
 
@@ -290,6 +288,12 @@ def check_same(flag, origin_target_list, new_target, black_path_count=0):
                 if key not in new_target_query:
                     # 如果参数不相同，那么不想似
                     check_flag_one = True
+
+            # 如果两个参数只有一个，且没有值，那么认为是?10321时间戳或者版本标号
+            if len(origin_query) == len(new_target_query) == 1:
+                for key in origin_query:
+                    if not origin_query[key]:
+                        check_flag_one = False
 
         check_flag = check_flag & check_flag_one
 
