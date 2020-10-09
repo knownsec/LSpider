@@ -82,7 +82,7 @@ class SpiderCoreBackend:
         # 当有空闲线程时才继续
         i = 0
 
-        # 启动两个线程用于紧急任务
+        # 启动2个线程用于紧急任务
         while i < 2:
             i += 1
             spidercore = SpiderCore(self.emergency_target_list)
@@ -137,6 +137,12 @@ class SpiderCoreBackend:
             target_cookies = task.cookies
             task_is_emergency = task.is_emergency
 
+            # 重设扫描时间
+            task.last_scan_time = nowtime
+            task.is_emergency = False
+            task.is_finished = True
+            task.save()
+
             for target in targets:
 
                 if IS_OPEN_RABBITMQ:
@@ -153,12 +159,6 @@ class SpiderCoreBackend:
 
                 if domain:
                     PrescanCore().start(domain)
-
-            # 重设扫描时间
-            task.last_scan_time = nowtime
-            task.is_emergency = False
-            task.is_finished = True
-            task.save()
 
             # 每次只读一个任务，在一个任务后退出重启
             # 紧急任务不影响到普通任务
@@ -198,6 +198,7 @@ class SpiderCoreBackend:
 
                     # 重设扫描时间
                     subdomain.lastscan = nowtime
+                    subdomain.is_finished = True
                     subdomain.save()
 
             if new_task:

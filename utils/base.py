@@ -77,4 +77,4 @@ def check_target(target_list):
                     if target.strip():
                         result.append('http://'+target.strip())
 
-    return result
+    return list(set(result))
