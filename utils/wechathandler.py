@@ -38,7 +38,7 @@ def send_text(content):
 
 def send_text_admin(content):
     enterprise_debug.message.send_text(
-        agent_id=WECHAT_NOTICE['agent_id'],
+        agent_id=WECHAT_NOTICE_DEBUG['agent_id'],
         user_ids='guoyingqi0',
         tag_ids='',
         content=content,
