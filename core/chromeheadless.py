@@ -24,7 +24,7 @@ import random
 from urllib.parse import urlparse
 
 from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY, IS_OPEN_CHROME_PROXY
-from LSpider.settings import CHROME_DOWNLOAD_PATH
+from LSpider.settings import CHROME_DOWNLOAD_PATH, IS_TEST_ENVIRONMENT
 from utils.log import logger
 
 
@@ -67,7 +67,8 @@ class ChromeDriver:
     def init_object(self):
 
         self.chrome_options = webdriver.ChromeOptions()
-        self.chrome_options.add_argument('--headless')
+        if not IS_TEST_ENVIRONMENT:
+            self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_argument('--no-sandbox')
         self.chrome_options.add_argument('--disable-images')
@@ -135,6 +136,8 @@ class ChromeDriver:
                 logger.info("[ChromeHeadless] Page {} need login.".format(url))
                 return 2, True, ""
 
+            time.sleep(3)
+
             if isclick:
                 if not self.click_page():
                     self.driver.implicitly_wait(10)
@@ -188,8 +191,11 @@ class ChromeDriver:
 
     def click_page(self):
 
-        self.click_link()
+        # self.click_link()
+        # 先把格子和表单填了
         self.click_button()
+
+        # 链接要处理一下
 
     def check_back(self):
         if self.check_host():
@@ -212,9 +218,10 @@ class ChromeDriver:
                 link = links[i]
 
                 href = link.get_attribute('href')
+                self.driver.execute_script("atags = document.getElementsByTagName('a');for(i=0,i<=atags.length,i++){atags['i'].setAttribute('target', '_blank')}")
 
-                if not href:
-                    continue
+                # if not href:
+                #     continue
 
                 if href.startswith('#'):
                     link.click()
@@ -313,8 +320,6 @@ class ChromeDriver:
                 except selenium.common.exceptions.ElementNotInteractableException:
                     logger.warning("[ChromeHeadless][Click button] error interact")
 
-                    if self.check_back():
-                        inputs = self.driver.find_elements_by_tag_name('input')
                     continue
 
                 except selenium.common.exceptions.StaleElementReferenceException:
@@ -371,6 +376,7 @@ class ChromeDriver:
             is_has_login_form = False
             is_has_login_button = False
             is_has_login_input = False
+            is_has_login_a = False
 
             forms = self.driver.find_elements_by_tag_name('form')
             forms_len = len(forms)
@@ -414,7 +420,19 @@ class ChromeDriver:
                         if key in input.get_attribute('innerHTML'):
                             is_has_login_input = True
 
-            if is_has_login_button or is_has_login_form or is_has_login_input:
+            atags = self.driver.find_elements_by_tag_name('a')
+            atags_len = len(atags)
+
+            for i in range(atags_len):
+                atag = atags[i]
+
+                if atag.is_enabled() and atag.is_displayed():
+
+                    for key in ['login', 'sign', '登录', '登入']:
+                        if key in atag.text:
+                            is_has_login_a = True
+
+            if is_has_login_button or is_has_login_form or is_has_login_input or is_has_login_a:
                 return True
             else:
                 return False

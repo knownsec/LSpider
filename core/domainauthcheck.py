@@ -38,7 +38,7 @@ def check_login_or_get_cookie(url):
         # 检查上层域名是否存在鉴权保存数据
         parent_domain = ".".join(domain.split('.')[1:])
 
-        pad = AccountDataTable.objects.filter(parent_domain=parent_domain).first()
+        pad = AccountDataTable.objects.filter(domain=parent_domain).first()
 
         if pad:
             logger.debug("[Check Login] Url {} use parent domain {} login cookie.".format(url, parent_domain))

@@ -188,7 +188,7 @@ class SpiderCoreBackend:
                 target = subdomain.subdomain.strip()
 
                 if IS_OPEN_RABBITMQ:
-                    if task_is_emergency:
+                    if subdomain.is_emergency:
                         self.rabbitmq_handler.new_emergency_scan_target(json.dumps(
                             {'url': "http://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
                         self.rabbitmq_handler.new_emergency_scan_target(json.dumps(
