@@ -61,7 +61,7 @@ New vuls:\n
                         received_data += "{}: {}\n".format(key, received_json_data[key])
 
             else:
-                if time.time() % 3600 < 10:
+                if time.time() % 3600 < 5:
                     # 每小时提醒一次
                     received_data = """每时通报
 扫描发现的url数量: {},
@@ -76,7 +76,6 @@ New vuls:\n
 
             self.ReMess.new_message(received_data)
             return HttpResponse("Success Webhook.")
-
 
         else:
             return HttpResponse("Hello Webhook.")

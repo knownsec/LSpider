@@ -9,6 +9,8 @@
 '''
 
 
+import datetime
+
 from utils.log import logger
 from web.spider.models import SubDomainList
 
@@ -39,7 +41,7 @@ class PrescanCore:
 
             self.pluginObj_list.append(pluginObj)
 
-    def start(self, domain, issave=True):
+    def start(self, domain, is_save=True, is_emergency=False):
         for pluginObj in self.pluginObj_list:
 
             subdomain_list = pluginObj.query(domain)
@@ -58,11 +60,13 @@ class PrescanCore:
                 if s:
                     continue
 
-                if issave:
+                if is_save:
                     nowtime = datetime.datetime.now()
 
-                    s1 = SubDomainList(subdomain=subdomain, lastscan=nowtime, is_finished=False)
+                    s1 = SubDomainList(subdomain=subdomain, lastscan=nowtime, is_finished=False, is_emergency=is_emergency)
                     s1.save()
+
+                    logger.info("[Pre Scan] New Sub-domain {}.".format(subdomain))
 
         logger.info("[Pre Scan] domain {} find Sub-domain {}".format(domain, self.result_list))
         return self.result_list

@@ -10,6 +10,7 @@ class SubDomainList(models.Model):
     banner = models.CharField(max_length=1000, null=True, default="")
     lastscan = models.DateTimeField()
     is_finished = models.BooleanField(default=False)
+    is_emergency = models.BooleanField(default=False)
 
 
 URL_TYPE = {
