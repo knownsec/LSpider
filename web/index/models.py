@@ -34,4 +34,5 @@ class AccountDataTable(models.Model):
 class LoginPageList(models.Model):
     domain = models.CharField(max_length=200)
     url = models.CharField(max_length=1000)
+    title = models.CharField(max_length=200, default="", null=True)
     is_active = models.BooleanField(default=True)

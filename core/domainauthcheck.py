@@ -18,9 +18,10 @@ from utils.log import logger
 from utils.wechathandler import ReMess
 
 
-def check_login_or_get_cookie(url):
+def check_login_or_get_cookie(url, title=""):
     """
     检查页面权限并返回cookie
+    :param title:
     :param url:
     :return:
     """
@@ -53,7 +54,7 @@ Domain: {}
 Url: {}
 """.format(domain, url))
 
-                nlp = LoginPageList(domain=domain, url=url)
+                nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
 
             return back_cookie
@@ -69,7 +70,7 @@ Domain: {}
 Url: {}
 """.format(domain, url))
 
-                nlp = LoginPageList(domain=domain, url=url)
+                nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
 
             return ""

@@ -17,6 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.action_chains import ActionChains
 
 import os
 import traceback
@@ -121,8 +122,10 @@ class ChromeDriver:
     def get_resp(self, url, cookies=None, times=0, isclick=True):
 
         try:
+            response_code = 1
+
             self.origin_url = url
-            self.driver.implicitly_wait(10)
+            self.driver.implicitly_wait(5)
             self.driver.get(url)
 
             if cookies:
@@ -134,7 +137,8 @@ class ChromeDriver:
             # 检查是否是登录界面
             if self.check_login():
                 logger.info("[ChromeHeadless] Page {} need login.".format(url))
-                return 2, True, ""
+                response_code = 2
+                # return 2, True, ""
 
             time.sleep(3)
 
@@ -143,7 +147,11 @@ class ChromeDriver:
                     self.driver.implicitly_wait(10)
                     self.driver.get(url)
 
-            return 1, self.driver.page_source, self.driver.title
+            response_source = self.driver.page_source
+            response_title = self.driver.title
+
+            # return 1, self.driver.page_source, self.driver.title
+            return response_code, response_source, response_title
 
         except selenium.common.exceptions.InvalidSessionIdException:
             logger.warning("[ChromeHeadless]Chrome Headless quit unexpectedly..")
@@ -196,11 +204,15 @@ class ChromeDriver:
         self.click_button()
 
         # 链接要处理一下
+        self.click_link()
 
     def check_back(self):
         if self.check_host():
             new_url = self.driver.current_url
-            self.driver.back()
+            # self.driver.back()
+            self.driver.implicitly_wait(10)
+            self.driver.get(self.origin_url)
+
             return True
         return False
 
@@ -209,35 +221,35 @@ class ChromeDriver:
         遇到一个问题，如果页面变化，那么获取到的标签hook会丢失，这里我们尝试用计数器来做
         """
 
-        links = self.driver.find_elements_by_tag_name('a')
+        links = self.driver.find_elements_by_xpath('//a')
         links_len = len(links)
 
         for i in range(links_len):
 
             try:
+                links = self.driver.find_elements_by_xpath('//a')
                 link = links[i]
 
                 href = link.get_attribute('href')
-                self.driver.execute_script("atags = document.getElementsByTagName('a');for(i=0,i<=atags.length,i++){atags['i'].setAttribute('target', '_blank')}")
+                self.driver.execute_script("atags = document.getElementsByTagName('a');for(i=0;i<=atags.length;i++) { if(atags[i]){atags[i].setAttribute('target', '_blank')}}")
 
                 # if not href:
                 #     continue
 
-                if href.startswith('#'):
-                    link.click()
+                # if href.startswith('#'):
+                #     link.click()
+                #
+                #     self.check_back()
+                #
+                # if href == "javascript:void(0);":
+                link.click()
 
-                    self.check_back()
-
-                if href == "javascript:void(0);":
-                    link.click()
-
-                    self.check_back()
+                self.check_back()
 
             except selenium.common.exceptions.ElementNotInteractableException:
                 logger.warning("[ChromeHeadless][Click Page] error interact")
 
                 self.check_back()
-                links = self.driver.find_elements_by_tag_name('a')
                 continue
 
             except selenium.common.exceptions.StaleElementReferenceException:
@@ -263,31 +275,31 @@ class ChromeDriver:
 
         # user
         for key in ['user', '用户名', 'name']:
-            if key in input.get_attribute('innerHTML'):
+            if key in input.get_attribute('outerHTML'):
                 input.send_keys('admin')
                 return
 
         # pass
         for key in ['pass', 'pwd', '密码']:
-            if key in input.get_attribute('innerHTML'):
+            if key in input.get_attribute('outerHTML'):
                 input.send_keys('123456')
                 return
 
         # email
         for key in ['email']:
-            if key in input.get_attribute('innerHTML'):
+            if key in input.get_attribute('outerHTML'):
                 input.send_keys('{}@{}.com'.format(random_string(4), random_string(4)))
                 return
 
         # phone
         for key in ['phone']:
-            if key in input.get_attribute('innerHTML'):
+            if key in input.get_attribute('outerHTML'):
                 input.send_keys('{}'.format(random.randint(13000000000, 14000000000)))
                 return
 
         # address
         for key in ['address', 'street']:
-            if key in input.get_attribute('innerHTML'):
+            if key in input.get_attribute('outerHTML'):
                 input.send_keys('4492 Garfield Road')
                 return
 
@@ -305,7 +317,7 @@ class ChromeDriver:
     def click_button(self):
 
         try:
-            inputs = self.driver.find_elements_by_tag_name('input')
+            inputs = self.driver.find_elements_by_xpath("//input")
             input_lens = len(inputs)
 
             if not inputs:
@@ -315,10 +327,37 @@ class ChromeDriver:
                 try:
                     input = inputs[i]
 
-                    self.smart_input(input)
+                    # 移动鼠标
+                    # 如果标签没有隐藏，那么移动鼠标
+                    if input.is_enabled() and input.is_displayed():
+
+                        action = ActionChains(self.driver)
+                        action.move_to_element(input).perform()
+
+                        self.smart_input(input)
+                    else:
+                        tag_id = input.get_attribute('id')
+
+                        if tag_id:
+                            self.driver.execute_script(
+                                "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id,
+                                                                                                   random_string()))
 
                 except selenium.common.exceptions.ElementNotInteractableException:
-                    logger.warning("[ChromeHeadless][Click button] error interact")
+                    logger.warning("[ChromeHeadless][Click button] error interact...{}".format(traceback.format_exc()))
+                    tag_id = input.get_attribute('id')
+
+                    if tag_id:
+                        self.driver.execute_script("document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
+
+                    continue
+
+                except selenium.common.exceptions.JavascriptException:
+                    tag_id = input.get_attribute('id')
+
+                    if tag_id:
+                        self.driver.execute_script(
+                            "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
 
                     continue
 
@@ -331,8 +370,23 @@ class ChromeDriver:
                     logger.warning("[ChromeHeadless][Click button] wrong index for button")
                     continue
 
-            submit = self.driver.find_element_by_xpath("//input[@type='submit']")
-            submit.click()
+            submit_button = self.driver.find_element_by_xpath("//input[@type='submit']")
+            submit_button.click()
+
+            # submit_buttons_len = len(submit_buttons)
+
+            # for i in range(submit_buttons_len):
+            #     submit_button = submit_buttons[i]
+            #
+            #     # 移动鼠标
+            #     action = ActionChains(self.driver)
+            #     action.move_to_element(submit_button).perform()
+            #
+            #     submit_button.click()
+            #
+            #     if self.check_back():
+            #         submit_buttons = self.driver.find_elements_by_xpath("//input[@type='submit']")
+
 
             buttons = self.driver.find_elements_by_tag_name('button')
             buttons_len = len(buttons)
@@ -403,7 +457,7 @@ class ChromeDriver:
                 if button.is_enabled() and button.is_displayed():
 
                     for key in ['login', 'sign', 'user', 'pass']:
-                        if key in button.get_attribute('innerHTML'):
+                        if key in button.get_attribute('outerHTML'):
                             is_has_login_button = True
             inputs = self.driver.find_elements_by_tag_name('input')
             inputs_len = len(inputs)
@@ -417,7 +471,7 @@ class ChromeDriver:
                 if input.is_enabled() and input.is_displayed():
 
                     for key in ['login', 'sign', 'user', 'pass', 'account', 'phone', '手机']:
-                        if key in input.get_attribute('innerHTML'):
+                        if key in input.get_attribute('outerHTML'):
                             is_has_login_input = True
 
             atags = self.driver.find_elements_by_tag_name('a')

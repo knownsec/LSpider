@@ -293,6 +293,15 @@ class SpiderCore:
                 logger.debug(("[Scan] ban domain exist...continue"))
                 return False
 
+            if task['deep'] == 0:
+                backend_cookies = check_login_or_get_cookie(task['url'])
+
+                if not backend_cookies:
+                    # 如果为空，那么还没设置好鉴权
+                    self.rabbitmq_handler.new_emergency_scan_target(message)
+                    time.sleep(0.5)
+                    return False
+
             self.scan(task, is_emergency=True)
         except json.decoder.JSONDecodeError:
             task = eval(message)
@@ -300,6 +309,15 @@ class SpiderCore:
             if checkbanlist(task['url']):
                 logger.debug(("[Scan] ban domain exist...continue"))
                 return False
+
+            if task['deep'] == 0:
+                backend_cookies = check_login_or_get_cookie(task['url'])
+
+                if not backend_cookies:
+                    # 如果为空，那么还没设置好鉴权
+                    self.rabbitmq_handler.new_emergency_scan_target(message)
+                    time.sleep(0.5)
+                    return False
 
             self.scan(task, is_emergency=True)
 
@@ -360,7 +378,7 @@ class SpiderCore:
 
             if code == 2:
                 # 代表这个页面需要登录
-                backend_cookies = check_login_or_get_cookie(target['url'])
+                backend_cookies = check_login_or_get_cookie(target['url'], title)
 
                 # 任务塞到加急队列中
                 new_target = target
