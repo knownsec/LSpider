@@ -42,6 +42,6 @@ class Command(BaseCommand):
 
         except KeyboardInterrupt:
             logger.warn("[Spider] stop scan.")
-            sys.exit(0)
+            exit(0)
         except:
             logger.error("[Spider] something error, {}".format(traceback.format_exc()))

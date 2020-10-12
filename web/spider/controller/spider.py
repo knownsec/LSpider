@@ -291,16 +291,17 @@ class SpiderCore:
 
             if checkbanlist(task['url']):
                 logger.debug(("[Scan] ban domain exist...continue"))
-                return False
+                return True
 
             if task['deep'] == 0:
                 backend_cookies = check_login_or_get_cookie(task['url'])
 
                 if not backend_cookies:
                     # 如果为空，那么还没设置好鉴权
+                    logger.debug("[INIT][DISTRIBUTE] url {} back rabbitmq".format(message))
                     self.rabbitmq_handler.new_emergency_scan_target(message)
                     time.sleep(0.5)
-                    return False
+                    return True
 
             self.scan(task, is_emergency=True)
         except json.decoder.JSONDecodeError:
@@ -308,21 +309,23 @@ class SpiderCore:
 
             if checkbanlist(task['url']):
                 logger.debug(("[Scan] ban domain exist...continue"))
-                return False
+                return True
 
             if task['deep'] == 0:
                 backend_cookies = check_login_or_get_cookie(task['url'])
 
                 if not backend_cookies:
                     # 如果为空，那么还没设置好鉴权
+                    logger.debug("[INIT][DISTRIBUTE] json url {} back rabbitmq".format(message))
                     self.rabbitmq_handler.new_emergency_scan_target(message)
                     time.sleep(0.5)
-                    return False
+                    return True
 
             self.scan(task, is_emergency=True)
 
         except:
             # 任务启动错误则把任务重新插回去
+            logger.debug("[INIT] Something error...{}".format(traceback.format_exc()))
             self.rabbitmq_handler.new_emergency_scan_target(message)
             time.sleep(0.5)
             return False

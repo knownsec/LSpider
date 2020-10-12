@@ -206,11 +206,14 @@ class ChromeDriver:
         # 链接要处理一下
         self.click_link()
 
+        # onclick
+        self.click_onlick()
+
     def check_back(self):
         if self.check_host():
             new_url = self.driver.current_url
             # self.driver.back()
-            self.driver.implicitly_wait(10)
+            self.driver.implicitly_wait(5)
             self.driver.get(self.origin_url)
 
             return True
@@ -231,23 +234,55 @@ class ChromeDriver:
                 link = links[i]
 
                 href = link.get_attribute('href')
-                self.driver.execute_script("atags = document.getElementsByTagName('a');for(i=0;i<=atags.length;i++) { if(atags[i]){atags[i].setAttribute('target', '_blank')}}")
+                self.driver.execute_script("atags = document.getElementsByTagName('a');for(i=0;i<=atags.length;i++) { if(atags[i]){atags[i].setAttribute('target', '')}}")
 
-                # if not href:
-                #     continue
+                if link.is_displayed() and link.is_enabled():
+                    link.click()
 
-                # if href.startswith('#'):
-                #     link.click()
-                #
-                #     self.check_back()
-                #
-                # if href == "javascript:void(0);":
-                link.click()
+                    self.check_back()
+
+            except selenium.common.exceptions.ElementNotInteractableException as e:
+                logger.warning("[ChromeHeadless][Click Page] error interact. {}".format(e))
+
+                self.check_back()
+                continue
+
+            except selenium.common.exceptions.StaleElementReferenceException:
+                logger.warning("[ChromeHeadless][Click Page] page reload or wrong back redirect")
+
+                self.check_back()
+                return
+
+            except IndexError:
+                logger.warning("[ChromeHeadless][Click Page] wrong index for link")
+                continue
+
+            except selenium.common.exceptions.NoSuchElementException:
+                logger.warning("[ChromeHeadless][Click Page] No Such Element")
+                return
+
+    def click_onlick(self):
+        """
+        点包含onlick的按钮
+        :return:
+        """
+        divs = self.driver.find_elements_by_xpath('//*[@onclick]')
+        divs_len = len(divs)
+
+        for i in range(divs_len):
+
+            try:
+                divs = self.driver.find_elements_by_xpath('//*[@onclick]')
+                div = divs[i]
+
+                # href = div.get_attribute('href')
+
+                div.click()
 
                 self.check_back()
 
-            except selenium.common.exceptions.ElementNotInteractableException:
-                logger.warning("[ChromeHeadless][Click Page] error interact")
+            except selenium.common.exceptions.ElementNotInteractableException as e:
+                logger.warning("[ChromeHeadless][Click Page] error interact. {}".format(e))
 
                 self.check_back()
                 continue
@@ -314,51 +349,95 @@ class ChromeDriver:
 
         return
 
-    def click_button(self):
+    def finish_form(self):
+        """
+        填充表单
+        :return:
+        """
+        inputs = self.driver.find_elements_by_xpath("//input")
+        self.driver.execute_script(
+            "itags = document.getElementsByTagName('input');for(i=0;i<=itags.length;i++) { if(itags[i]){itags[i].removeAttribute('style')}}")
 
-        try:
-            inputs = self.driver.find_elements_by_xpath("//input")
-            input_lens = len(inputs)
+        input_lens = len(inputs)
 
-            if not inputs:
-                return
+        if not inputs:
+            return
 
-            for i in range(input_lens):
-                try:
-                    input = inputs[i]
+        for i in range(input_lens):
+            try:
+                input = inputs[i]
 
-                    # 移动鼠标
-                    # 如果标签没有隐藏，那么移动鼠标
-                    if input.is_enabled() and input.is_displayed():
+                # 移动鼠标
+                # 如果标签没有隐藏，那么移动鼠标
+                if input.is_enabled() and input.is_displayed():
 
-                        action = ActionChains(self.driver)
-                        action.move_to_element(input).perform()
+                    action = ActionChains(self.driver)
+                    action.move_to_element(input).perform()
 
-                        self.smart_input(input)
-                    else:
-                        tag_id = input.get_attribute('id')
-
-                        if tag_id:
-                            self.driver.execute_script(
-                                "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id,
-                                                                                                   random_string()))
-
-                except selenium.common.exceptions.ElementNotInteractableException:
-                    logger.warning("[ChromeHeadless][Click button] error interact...{}".format(traceback.format_exc()))
-                    tag_id = input.get_attribute('id')
-
-                    if tag_id:
-                        self.driver.execute_script("document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
-
-                    continue
-
-                except selenium.common.exceptions.JavascriptException:
+                    self.smart_input(input)
+                else:
                     tag_id = input.get_attribute('id')
 
                     if tag_id:
                         self.driver.execute_script(
-                            "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
+                            "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id,
+                                                                                               random_string()))
 
+            except selenium.common.exceptions.ElementNotInteractableException as e:
+                logger.warning("[ChromeHeadless][Click button] error interact...{}".format(e))
+                tag_id = input.get_attribute('id')
+
+                if tag_id:
+                    self.driver.execute_script("document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
+
+                continue
+
+            except selenium.common.exceptions.JavascriptException:
+                tag_id = input.get_attribute('id')
+
+                if tag_id:
+                    self.driver.execute_script(
+                        "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
+
+                continue
+
+            except selenium.common.exceptions.StaleElementReferenceException:
+                logger.warning("[ChromeHeadless][Click button] page reload or wrong back redirect")
+
+                return
+
+            except IndexError:
+                logger.warning("[ChromeHeadless][Click button] wrong index for button")
+                continue
+
+    def click_button(self):
+
+        try:
+            submit_buttons = self.driver.find_element_by_xpath("//input[@type='submit']")
+
+            submit_buttons_len = len(submit_buttons)
+
+            for i in range(submit_buttons_len):
+
+                try:
+                    submit_buttons = self.driver.find_elements_by_xpath("//input[@type='submit']")
+                    submit_button = submit_buttons[i]
+
+                    # 完成表单
+                    self.finish_form()
+
+                    # 移动鼠标
+                    if submit_button.is_displayed() and submit_button.is_enabled():
+                        action = ActionChains(self.driver)
+                        action.move_to_element(submit_button).perform()
+
+                        submit_button.click()
+
+                        self.check_back()
+                except selenium.common.exceptions.ElementNotInteractableException:
+                    logger.warning("[ChromeHeadless][Click button] error interact")
+
+                    self.check_back()
                     continue
 
                 except selenium.common.exceptions.StaleElementReferenceException:
@@ -369,43 +448,33 @@ class ChromeDriver:
                 except IndexError:
                     logger.warning("[ChromeHeadless][Click button] wrong index for button")
                     continue
+        except selenium.common.exceptions.NoSuchElementException as e:
+            logger.warning("[ChromeHeadless][Click button] No Such Element.{}".format(e))
 
-            submit_button = self.driver.find_element_by_xpath("//input[@type='submit']")
-            submit_button.click()
-
-            # submit_buttons_len = len(submit_buttons)
-
-            # for i in range(submit_buttons_len):
-            #     submit_button = submit_buttons[i]
-            #
-            #     # 移动鼠标
-            #     action = ActionChains(self.driver)
-            #     action.move_to_element(submit_button).perform()
-            #
-            #     submit_button.click()
-            #
-            #     if self.check_back():
-            #         submit_buttons = self.driver.find_elements_by_xpath("//input[@type='submit']")
-
-
+        try:
             buttons = self.driver.find_elements_by_tag_name('button')
             buttons_len = len(buttons)
 
             for i in range(buttons_len):
 
                 try:
-
+                    buttons = self.driver.find_elements_by_tag_name('button')
                     button = buttons[i]
-                    button.click()
 
-                    if self.check_back():
-                        buttons = self.driver.find_elements_by_tag_name('button')
+                    # 完成表单
+                    self.finish_form()
+
+                    if button.is_enabled() and button.is_displayed():
+                        action = ActionChains(self.driver)
+                        action.move_to_element(button).perform()
+                        button.click()
+
+                        self.check_back()
 
                 except selenium.common.exceptions.ElementNotInteractableException:
                     logger.warning("[ChromeHeadless][Click button] error interact")
 
-                    if self.check_back():
-                        buttons = self.driver.find_elements_by_tag_name('button')
+                    self.check_back()
                     continue
 
                 except selenium.common.exceptions.StaleElementReferenceException:
@@ -418,7 +487,7 @@ class ChromeDriver:
                     continue
 
         except selenium.common.exceptions.NoSuchElementException:
-            logger.warning("[ChromeHeadless][Click Page] No Such Element")
+            logger.warning("[ChromeHeadless][Click button] No Such Element.{}".format(traceback.format_exc()))
             return
 
     def check_login(self):
