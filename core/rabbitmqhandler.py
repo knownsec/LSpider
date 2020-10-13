@@ -175,7 +175,7 @@ class RabbitmqHandler:
         # self.check_link_and_bind_scan()
 
         # 绑定队列和交换器
-        self.scan_target_channel.queue_declare(queue="scantarget", durable=True)
+        self.scan_target_channel.queue_declare(queue="scantarget", arguments={"x-max-priority": 10}, durable=True)
         self.scan_target_channel.queue_bind(queue="scantarget", exchange="scantarget", routing_key="scantarget")
         self.scan_target_channel.basic_qos(prefetch_count=1)
 
@@ -195,7 +195,7 @@ class RabbitmqHandler:
         # self.check_link_and_bind_scan()
 
         # 绑定队列和交换器
-        self.emergency_scan_target_channel.queue_declare(queue="emergency_scantarget", durable=True)
+        self.emergency_scan_target_channel.queue_declare(queue="emergency_scantarget", arguments={"x-max-priority": 10}, durable=True)
         self.emergency_scan_target_channel.queue_bind(queue="emergency_scantarget", exchange="emergency_scantarget", routing_key="emergency_scantarget")
         self.emergency_scan_target_channel.basic_qos(prefetch_count=1)
 
