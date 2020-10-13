@@ -86,29 +86,39 @@ class RabbitmqHandler:
         return queue
 
     def new_scan_target(self, msg, weight=0):
-        self.check_link_and_bind_scan()
+        try:
+            self.check_link_and_bind_scan()
 
-        logger.debug("[Scan][SEND] msg: {}".format(msg))
+            logger.debug("[Scan][SEND] msg: {}".format(msg))
 
-        msg_groups = pika.BasicProperties()
-        msg_groups.content_type = "text/plain"
-        msg_groups.priority = weight
+            msg_groups = pika.BasicProperties()
+            msg_groups.content_type = "text/plain"
+            msg_groups.priority = weight
 
-        self.scan_target_channel.basic_publish(body=msg, exchange="scantarget", properties=msg_groups, routing_key="scantarget")
+            self.scan_target_channel.basic_publish(body=msg, exchange="scantarget", properties=msg_groups, routing_key="scantarget")
 
-        return True
+            return True
+
+        except pika.exceptions.StreamLostError:
+            logger.error("[Rabbitmq] Scan consum transport error.")
+            return False
 
     def new_emergency_scan_target(self, msg):
-        self.check_emergency_link_and_bind_scan()
+        try:
+            self.check_emergency_link_and_bind_scan()
 
-        logger.debug("[Scan][emergency SEND] msg: {}".format(msg))
+            logger.debug("[Scan][emergency SEND] msg: {}".format(msg))
 
-        msg_groups = pika.BasicProperties()
-        msg_groups.content_type = "text/plain"
+            msg_groups = pika.BasicProperties()
+            msg_groups.content_type = "text/plain"
 
-        self.emergency_scan_target_channel.basic_publish(body=msg, exchange="emergency_scantarget", properties=msg_groups, routing_key="emergency_scantarget")
+            self.emergency_scan_target_channel.basic_publish(body=msg, exchange="emergency_scantarget", properties=msg_groups, routing_key="emergency_scantarget")
 
-        return True
+            return True
+
+        except pika.exceptions.StreamLostError:
+            logger.error("[Rabbitmq] Scan consum transport error.")
+            return False
 
     def get_scan_ready_count(self):
         try:
@@ -121,7 +131,7 @@ class RabbitmqHandler:
 
         except pika.exceptions.StreamLostError:
             logger.error("[Rabbitmq] Scan consum transport error.")
-            return 0
+            return 1
 
     def get_emergency_scan_ready_count(self):
         try:
@@ -134,7 +144,7 @@ class RabbitmqHandler:
 
         except pika.exceptions.StreamLostError:
             logger.error("[Rabbitmq] Scan consum transport error.")
-            return 0
+            return 1
 
     # def new_message(self, msg):
     #
