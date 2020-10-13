@@ -287,7 +287,7 @@ class SpiderCore:
                 return True
 
             if task['deep'] == 0:
-                backend_cookies = check_login_or_get_cookie(task['url'])
+                backend_cookies, auth_status = check_login_or_get_cookie(task['url'])
 
                 if not backend_cookies:
                     # 如果为空，那么还没设置好鉴权
@@ -298,11 +298,15 @@ class SpiderCore:
 
                 else:
                     # 将设置好鉴权的任务放回主线程
+                    # 如果使用了父节点的cookie，那么紧急队列挂起
                     task['cookie'] = backend_cookies
                     message = json.dumps(task)
 
                     logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
                     self.rabbitmq_handler.new_scan_target(message, weight=5)
+                    if not auth_status:
+                        self.rabbitmq_handler.new_emergency_scan_target(message)
+
                     time.sleep(0.5)
                     return True
 
@@ -322,7 +326,7 @@ class SpiderCore:
                 return True
 
             if task['deep'] == 0:
-                backend_cookies = check_login_or_get_cookie(task['url'])
+                backend_cookies, auth_status = check_login_or_get_cookie(task['url'])
 
                 if not backend_cookies:
                     # 如果为空，那么还没设置好鉴权
@@ -338,6 +342,10 @@ class SpiderCore:
 
                     logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
                     self.rabbitmq_handler.new_scan_target(message, weight=5)
+
+                    if not auth_status:
+                        self.rabbitmq_handler.new_emergency_scan_target(message)
+
                     time.sleep(0.5)
                     return True
 
@@ -408,7 +416,7 @@ class SpiderCore:
 
             if code == 2:
                 # 代表这个页面需要登录
-                backend_cookies = check_login_or_get_cookie(target['url'], title)
+                backend_cookies, auth_status = check_login_or_get_cookie(target['url'], title)
 
                 # 任务塞到加急队列中
                 new_target = target

@@ -33,7 +33,7 @@ def check_login_or_get_cookie(url, title=""):
         logger.debug("[Check Login] Url {} get login cookie.".format(url))
         back_cookie = ad.cookies
 
-        return back_cookie
+        return back_cookie, True
 
     else:
         # 检查上层域名是否存在鉴权保存数据
@@ -58,7 +58,7 @@ Title: {}
                 nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
 
-            return back_cookie
+            return back_cookie, False
 
         else:
             # 剩余的都要保留并推送
@@ -75,4 +75,4 @@ Title: {}
                 nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
 
-            return ""
+            return "", False
