@@ -179,7 +179,7 @@ class RabbitmqHandler:
         self.scan_target_channel.queue_bind(queue="scantarget", exchange="scantarget", routing_key="scantarget")
         self.scan_target_channel.basic_qos(prefetch_count=1)
 
-        self.scan_target_channel.basic_consume("scantarget", fallback, consumer_tag="scantarget-consumer", auto_ack=True)
+        self.scan_target_channel.basic_consume("scantarget", fallback, consumer_tag="scantarget-consumer")
 
         #开始订阅
         try:
@@ -199,7 +199,7 @@ class RabbitmqHandler:
         self.emergency_scan_target_channel.queue_bind(queue="emergency_scantarget", exchange="emergency_scantarget", routing_key="emergency_scantarget")
         self.emergency_scan_target_channel.basic_qos(prefetch_count=1)
 
-        self.emergency_scan_target_channel.basic_consume("emergency_scantarget", fallback, consumer_tag="emergency_scantarget-consumer", auto_ack=False)
+        self.emergency_scan_target_channel.basic_consume("emergency_scantarget", fallback, consumer_tag="emergency_scantarget-consumer")
 
         #开始订阅
         try:
