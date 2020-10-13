@@ -82,8 +82,8 @@ class SpiderCoreBackend:
         # 当有空闲线程时才继续
         i = 0
 
-        # 启动2个线程用于紧急任务
-        while i < 2:
+        # 启动1个线程用于紧急任务
+        while i < 1:
             i += 1
             spidercore = SpiderCore(self.emergency_target_list)
 
@@ -301,9 +301,26 @@ class SpiderCore:
                     logger.debug("[INIT][DISTRIBUTE] url {} back rabbitmq".format(message))
                     self.rabbitmq_handler.new_emergency_scan_target(message)
                     time.sleep(0.5)
+                    return False
+
+                else:
+                    # 将设置好鉴权的任务放回主线程
+                    task['cookie'] = backend_cookies
+                    message = json.dumps(task)
+
+                    logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
+                    self.rabbitmq_handler.new_scan_target(message, weight=1)
+                    time.sleep(0.5)
                     return True
 
-            self.scan(task, is_emergency=True)
+            else:
+                # 将设置好鉴权的任务和不满足条件的都放回主线程
+                logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
+                self.rabbitmq_handler.new_scan_target(message, weight=1)
+                time.sleep(0.5)
+                return True
+
+            # self.scan(task, is_emergency=True)
         except json.decoder.JSONDecodeError:
             task = eval(message)
 
@@ -321,7 +338,24 @@ class SpiderCore:
                     time.sleep(0.5)
                     return True
 
-            self.scan(task, is_emergency=True)
+                else:
+                    # 将设置好鉴权的任务放回主线程
+                    task['cookie'] = backend_cookies
+                    message = json.dumps(task)
+
+                    logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
+                    self.rabbitmq_handler.new_scan_target(message, weight=1)
+                    time.sleep(0.5)
+                    return True
+
+            else:
+                # 将设置好鉴权的任务和不满足条件的都放回主线程
+                logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
+                self.rabbitmq_handler.new_scan_target(message, weight=1)
+                time.sleep(0.5)
+                return True
+
+            # self.scan(task, is_emergency=True)
 
         except:
             # 任务启动错误则把任务重新插回去
@@ -387,7 +421,11 @@ class SpiderCore:
                 new_target = target
                 new_target['cookies'] = backend_cookies
 
-                self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
+                # 如果获取到鉴权，那么任务放回主线程并增加权重
+                if backend_cookies:
+                    self.rabbitmq_handler.new_scan_target(json.dumps(new_target), weight=5)
+                else:
+                    self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
 
                 return
             else:
