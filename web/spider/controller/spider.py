@@ -152,7 +152,7 @@ class SpiderCoreBackend:
                         self.rabbitmq_handler.new_emergency_scan_target(
                             json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
                     else:
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}))
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0}), weight=1)
                 else:
                     self.target_list.put({'url': target, 'type': target_type, 'cookies': target_cookies, 'deep': 0})
 
@@ -195,9 +195,9 @@ class SpiderCoreBackend:
                             {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
 
                     else:
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
                         self.rabbitmq_handler.new_scan_target(json.dumps(
-                            {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
+                            {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
                 else:
                     self.target_list.put(
                         {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0})
@@ -239,17 +239,13 @@ class SpiderCore:
 
     def scan_task_distribute(self, channel, method, header, message):
 
-        # self.i += 1
-        # if self.i > 10000:
-        #     channel.basic_cancel(channel, nowait=False)
-        #     # after target list finish
-        #     self.req.close_driver()
-        #     return False
-
         # 确认收到消息
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
         try:
+            # 获取任务权重
+            task_weight = int(header.priority)
+
             # 获取任务信息
             task = json.loads(message)
 
@@ -257,35 +253,32 @@ class SpiderCore:
                 logger.debug(("[Scan] ban domain exist...continue"))
                 return False
 
-            self.scan(task)
+            self.scan(task, task_weight=task_weight)
         except json.decoder.JSONDecodeError:
+            # 获取任务权重
+            task_weight = int(header.priority)
+
             task = eval(message)
 
             if checkbanlist(task['url']):
                 logger.debug(("[Scan] ban domain exist...continue"))
                 return False
 
-            self.scan(task)
+            self.scan(task, task_weight=task_weight)
 
         except:
             # 任务启动错误则把任务重新插回去
-            self.rabbitmq_handler.new_scan_target(message)
+            self.rabbitmq_handler.new_scan_target(message, weight=1)
             time.sleep(0.5)
             return False
 
     def scan_emergency_task_distribute(self, channel, method, header, message):
 
-        # self.i += 1
-        # if self.i > 10000:
-        #     channel.basic_cancel(channel, nowait=False)
-        #     # after target list finish
-        #     self.req.close_driver()
-        #     return False
-
         # 确认收到消息
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
         try:
+
             # 获取任务信息
             task = json.loads(message)
 
@@ -309,14 +302,14 @@ class SpiderCore:
                     message = json.dumps(task)
 
                     logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
-                    self.rabbitmq_handler.new_scan_target(message, weight=1)
+                    self.rabbitmq_handler.new_scan_target(message, weight=5)
                     time.sleep(0.5)
                     return True
 
             else:
                 # 将设置好鉴权的任务和不满足条件的都放回主线程
                 logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
-                self.rabbitmq_handler.new_scan_target(message, weight=1)
+                self.rabbitmq_handler.new_scan_target(message, weight=5)
                 time.sleep(0.5)
                 return True
 
@@ -344,14 +337,14 @@ class SpiderCore:
                     message = json.dumps(task)
 
                     logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
-                    self.rabbitmq_handler.new_scan_target(message, weight=1)
+                    self.rabbitmq_handler.new_scan_target(message, weight=5)
                     time.sleep(0.5)
                     return True
 
             else:
                 # 将设置好鉴权的任务和不满足条件的都放回主线程
                 logger.debug("[INIT][DISTRIBUTE] url {} back to main Thread".format(message))
-                self.rabbitmq_handler.new_scan_target(message, weight=1)
+                self.rabbitmq_handler.new_scan_target(message, weight=5)
                 time.sleep(0.5)
                 return True
 
@@ -391,7 +384,7 @@ class SpiderCore:
                 logger.warning('[Scan] something error, {}'.format(traceback.format_exc()))
                 raise
 
-    def scan(self, target, is_emergency=False):
+    def scan(self, target, is_emergency=False, task_weight=0):
         i = 0
 
         try:
@@ -451,10 +444,7 @@ class SpiderCore:
 
                 # save to rabbitmq
                 if IS_OPEN_RABBITMQ:
-                    if is_emergency:
-                        self.rabbitmq_handler.new_emergency_scan_target(json.dumps(target))
-                    else:
-                        self.rabbitmq_handler.new_scan_target(json.dumps(target))
+                    self.rabbitmq_handler.new_scan_target(json.dumps(target), weight=task_weight+1)
                 else:
                     self.target_list.put(target)
 
