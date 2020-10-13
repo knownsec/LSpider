@@ -52,7 +52,8 @@ def check_login_or_get_cookie(url, title=""):
                 ReMess.debug_message("""New Login Page:
 Domain: {}
 Url: {}
-""".format(domain, url))
+Title: {}
+""".format(domain, url, title))
 
                 nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
@@ -68,7 +69,8 @@ Url: {}
                 ReMess.debug_message("""New Login Page:
 Domain: {}
 Url: {}
-""".format(domain, url))
+Title: {}
+""".format(domain, url, title))
 
                 nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
