@@ -282,6 +282,8 @@ class SpiderCore:
             # 获取任务信息
             task = json.loads(message)
 
+            print(task)
+
             if checkbanlist(task['url']):
                 logger.debug(("[Scan] ban domain exist...continue"))
                 return True
@@ -428,18 +430,17 @@ class SpiderCore:
                 else:
                     self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
 
-                return
             else:
                 backend_cookies = target['cookies']
 
-                # 如果为deep=0
-                # 那么记录title
-                if target['deep'] == 0:
-                    domain = urlparse(target['url']).netloc
+            # 如果为deep=0
+            # 那么记录title
+            if target['deep'] == 0:
+                domain = urlparse(target['url']).netloc
 
-                    sd = SubDomainList.objects.filter(subdomain=domain).first()
-                    sd.title = title
-                    sd.save()
+                sd = SubDomainList.objects.filter(subdomain=domain).first()
+                sd.title = title
+                sd.save()
 
             result_list = html_parser(content)
             result_list = url_parser(target['url'], result_list, target['deep'], backend_cookies)
