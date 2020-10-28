@@ -282,8 +282,6 @@ class SpiderCore:
             # 获取任务信息
             task = json.loads(message)
 
-            print(task)
-
             if checkbanlist(task['url']):
                 logger.debug(("[Scan] ban domain exist...continue"))
                 return True
