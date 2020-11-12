@@ -48,36 +48,7 @@ class SpiderCoreBackend:
         self.emergency_target_list = Queue()
         self.threadpool = ThreadPool()
 
-        # rabbitmq init
-        if IS_OPEN_RABBITMQ:
-            self.rabbitmq_handler = RabbitmqHandler()
-
-        t = threading.Thread(target=self.init_scan)
-        t.start()
-        time.sleep(3)
-
-        # 如果队列为空，那么直接跳出
-        if IS_OPEN_RABBITMQ:
-            if not self.rabbitmq_handler.get_scan_ready_count() and not self.rabbitmq_handler.get_emergency_scan_ready_count():
-                logger.info("[Spider Core] Spider Target Queue is empty.")
-                return
-
-        if not IS_OPEN_RABBITMQ and self.target_list.empty():
-            logger.info("[Spider Core] Spider Target Queue is empty.")
-            return
-
-        self.scan_id = get_new_scan_id()
-
-        if IS_OPEN_RABBITMQ:
-            left_tasks = self.rabbitmq_handler.get_scan_ready_count()
-            left_emergency_tasks = self.rabbitmq_handler.get_emergency_scan_ready_count()
-        else:
-            left_tasks = self.target_list.qsize()
-            left_emergency_tasks = self.emergency_target_list.qsize()
-
-        logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, left_tasks))
-        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
-
+        self.check_task()
         # 获取线程池然后分发信息对象
         # 当有空闲线程时才继续
         i = 0
@@ -104,6 +75,7 @@ class SpiderCoreBackend:
                     break
 
                 else:
+
                     i += 1
                     spidercore = SpiderCore(self.target_list)
 
@@ -113,10 +85,50 @@ class SpiderCoreBackend:
                         self.threadpool.new(spidercore.scancore)
                     else:
                         self.threadpool.new(spidercore.scan_for_queue)
-                    time.sleep(0.5)
+
+                    time.sleep(3)
 
             # self.threadpool.wait_all_thread()
-            time.sleep(1)
+            # 60s 检查一次任务以及线程状态
+            self.check_task()
+
+            time.sleep(60)
+
+    def check_task(self):
+
+        # rabbitmq init
+        if IS_OPEN_RABBITMQ:
+            self.rabbitmq_handler = RabbitmqHandler()
+
+        # checkstatus
+        tasklist = ScanTask.objects.filter(is_active=True, is_finished=False)
+
+        if tasklist:
+            t = threading.Thread(target=self.init_scan)
+            t.start()
+            time.sleep(3)
+
+        # 如果队列为空，那么直接跳出
+        if IS_OPEN_RABBITMQ:
+            if not self.rabbitmq_handler.get_scan_ready_count() and not self.rabbitmq_handler.get_emergency_scan_ready_count():
+                logger.info("[Spider Core] Spider Target Queue is empty.")
+                return
+
+        if not IS_OPEN_RABBITMQ and self.target_list.empty():
+            logger.info("[Spider Core] Spider Target Queue is empty.")
+            return
+
+        self.scan_id = get_new_scan_id()
+
+        if IS_OPEN_RABBITMQ:
+            left_tasks = self.rabbitmq_handler.get_scan_ready_count()
+            left_emergency_tasks = self.rabbitmq_handler.get_emergency_scan_ready_count()
+        else:
+            left_tasks = self.target_list.qsize()
+            left_emergency_tasks = self.emergency_target_list.qsize()
+
+        logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, left_tasks))
+        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
 
     def init_scan(self):
 

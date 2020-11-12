@@ -76,7 +76,11 @@ def html_parser(content):
             # match
             for url in match_content('(((ht|f)tps?):\/\/)?[\w\-]+(\.[\w\-]+)+([\w\-.,@?^=%&:/~+#]*[\w\-@?^=%&/~+#])?', content):
                 result_list.append({"type": "link", "url": url})
-            
+
+            for url in match_content('(?<=(\"|\'|\`))\/[a-zA-Z0-9_?&=\/\-\#\.]*(?=(\"|\'|\`))', content):
+                result_list.append({"type": "link", "url": url})
+
+
 
     except:
         logger.warning('[AST] something error, {}'.format(traceback.format_exc()))

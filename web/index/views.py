@@ -32,11 +32,12 @@ class WebhookView(View):
 
     def post(self, request):
 
-        received_json_data = json.loads(request.body)
+        received_json_data = json.loads(request.body)['data']
+        received_type = json.loads(request.body)['type']
 
         if received_json_data:
 
-            if "detail" in received_json_data:
+            if received_type != 'web_statistic':
                 # new vul
                 received_data = """
 New vuls:\n
