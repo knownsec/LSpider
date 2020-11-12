@@ -449,8 +449,10 @@ class SpiderCore:
                 domain = urlparse(target['url']).netloc
 
                 sd = SubDomainList.objects.filter(subdomain=domain).first()
-                sd.title = title
-                sd.save()
+
+                if sd:
+                    sd.title = title
+                    sd.save()
 
             result_list = html_parser(content)
             result_list = url_parser(target['url'], result_list, target['deep'], backend_cookies)
