@@ -110,7 +110,7 @@ class SpiderCoreBackend:
 
         # 如果队列为空，那么直接跳出
         if IS_OPEN_RABBITMQ:
-            if not self.rabbitmq_handler.get_scan_ready_count() and not self.rabbitmq_handler.get_emergency_scan_ready_count():
+            if not self.rabbitmq_handler.get_scan_ready_count():
                 logger.info("[Spider Core] Spider Target Queue is empty.")
                 return
 
