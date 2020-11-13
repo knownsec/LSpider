@@ -41,7 +41,7 @@ class HackeroneSpider:
         self.login()
         time.sleep(5)
 
-        code, content = self.chromeclass.get_resp(url, isclick=False)
+        code, content, title = self.chromeclass.get_resp(url, isclick=False)
         time.sleep(5)
 
         result = self.html_parse()

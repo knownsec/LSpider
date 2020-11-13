@@ -33,7 +33,7 @@ class BugcrowdSpider:
     def spider(self, appname):
         url = self.url + appname
 
-        code, content = self.chromeclass.get_resp(url, isclick=False)
+        code, content, title  = self.chromeclass.get_resp(url, isclick=False)
         time.sleep(5)
 
         result = self.html_parse()
@@ -58,7 +58,7 @@ class BugcrowdSpider:
                     result_list.append(domain.replace("*.", ""))
 
             except:
-                logger.warnning("[Bugcrowd spider][parse] url data parse error. {}".format(traceback.format_exc()))
+                logger.warning("[Bugcrowd spider][parse] url data parse error. {}".format(traceback.format_exc()))
                 continue
 
         return result_list
