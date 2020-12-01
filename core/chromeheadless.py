@@ -8,7 +8,6 @@
 @desc:
 '''
 
-
 import time
 
 import selenium
@@ -82,16 +81,22 @@ class ChromeDriver:
         self.chrome_options.add_argument("--disk-cache-size=1000")
 
         # for download path
-        try:
-            if os.path.exists(CHROME_DOWNLOAD_PATH):
-                os.mkdir(CHROME_DOWNLOAD_PATH)
+        # try:
+        #     if os.path.exists(CHROME_DOWNLOAD_PATH):
+        #         os.mkdir(CHROME_DOWNLOAD_PATH)
+        #
+        #     chrome_downloadfile_path = CHROME_DOWNLOAD_PATH
+        # except:
+        #     chrome_downloadfile_path = "./tmp"
 
-            chrome_downloadfile_path = CHROME_DOWNLOAD_PATH
-        except:
-            chrome_downloadfile_path = "./tmp"
+        chrome_downloadfile_path = '/dev/null'
 
+        prefs = {
+            'download.prompt_for_download': True,
+            'profile.default_content_settings.popups': 0,
+            'download.default_directory': chrome_downloadfile_path
+        }
 
-        prefs = {'profile.default_content_settings.popups': 0, 'download.default_directory': chrome_downloadfile_path}
         self.chrome_options.add_experimental_option('prefs', prefs)
 
         # proxy
@@ -112,9 +117,11 @@ class ChromeDriver:
             }
             # self.chrome_options.add_argument('--proxy-server={}'.format(CHROME_PROXY))
 
-        self.chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
+        self.chrome_options.add_argument(
+            'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
 
-        self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path, desired_capabilities=desired_capabilities)
+        self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path,
+                                       desired_capabilities=desired_capabilities)
 
         self.driver.set_page_load_timeout(15)
         self.driver.set_script_timeout(5)
@@ -168,7 +175,7 @@ class ChromeDriver:
                 return -1, False, ""
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
-            self.get_resp(url, cookies, times+1, isclick)
+            self.get_resp(url, cookies, times + 1, isclick)
             return -1, False, ""
 
         except selenium.common.exceptions.InvalidCookieDomainException:
@@ -234,7 +241,8 @@ class ChromeDriver:
                 link = links[i]
 
                 href = link.get_attribute('href')
-                self.driver.execute_script("atags = document.getElementsByTagName('a');for(i=0;i<=atags.length;i++) { if(atags[i]){atags[i].setAttribute('target', '')}}")
+                self.driver.execute_script(
+                    "atags = document.getElementsByTagName('a');for(i=0;i<=atags.length;i++) { if(atags[i]){atags[i].setAttribute('target', '')}}")
 
                 if link.is_displayed() and link.is_enabled():
                     link.click()
@@ -388,7 +396,8 @@ class ChromeDriver:
                 tag_id = input.get_attribute('id')
 
                 if tag_id:
-                    self.driver.execute_script("document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
+                    self.driver.execute_script(
+                        "document.getElementById('{}').setAttribute('value', '{}')".format(tag_id, random_string()))
 
                 continue
 
@@ -572,7 +581,8 @@ class ChromeDriver:
         origin = urlparse(self.origin_url)
         now = urlparse(self.driver.current_url)
 
-        if (origin.netloc != now.netloc) or (origin.path.replace('/', '') != now.path.replace('/', '')) or (origin.params != now.params) or (origin.query != now.query):
+        if (origin.netloc != now.netloc) or (origin.path.replace('/', '') != now.path.replace('/', '')) or (
+                origin.params != now.params) or (origin.query != now.query):
             return now.geturl()
 
         return False
@@ -589,6 +599,7 @@ class ChromeDriver:
 if __name__ == "__main__":
     Req = ChromeDriver()
 
-    Req.get_resp("http://152.136.99.52/phpmyadmin_s3cr3t/sql.php?server=1&db=lspider&table=spider_subdomainlist&pos=0", isclick=False)
+    Req.get_resp("http://152.136.99.52/phpmyadmin_s3cr3t/sql.php?server=1&db=lspider&table=spider_subdomainlist&pos=0",
+                 isclick=False)
 
     # print(Req.get_resp("https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"))
