@@ -89,7 +89,10 @@ class ChromeDriver:
         # except:
         #     chrome_downloadfile_path = "./tmp"
 
-        chrome_downloadfile_path = '/dev/null'
+        if os.name == 'nt':
+            chrome_downloadfile_path = "./tmp"
+        else:
+            chrome_downloadfile_path = '/dev/null'
 
         prefs = {
             'download.prompt_for_download': True,
