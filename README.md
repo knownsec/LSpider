@@ -138,9 +138,9 @@ WECHAT_NOTICE = {
 }
 ```
 
-# 404StarLink 2.0 - Galaxy
+# 404StarLink
 ![](https://github.com/knownsec/404StarLink-Project/raw/master/logo.png)
 
-LSpider 是 404Team [星链计划2.0](https://github.com/knownsec/404StarLink2.0-Galaxy)中的一环，如果对LSpider 有任何疑问又或是想要找小伙伴交流，可以参考星链计划的加群方式。
+LSpider 是 404Team [星链计划](https://github.com/knownsec/404StarLink-Project)中的一环，如果对LSpider有任何疑问又或是想要找小伙伴交流，可以参考星链计划的加群方式。
 
-- [https://github.com/knownsec/404StarLink2.0-Galaxy#community](https://github.com/knownsec/404StarLink2.0-Galaxy#community)
+- [https://github.com/knownsec/404StarLink-Project#community](https://github.com/knownsec/404StarLink-Project#community)
