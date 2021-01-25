@@ -17,6 +17,24 @@ git clone https://github.com/chaitin/xray.git
 ./xray_linux_amd64 webscan --listen 127.0.0.1:7777 --html-output /home/wwwroot/default/xray/a.html
 ```
 
+# 安装Mysql以及RabbitMQ
+
+由于LSpider没有设计专门的管理界面，所以建议使用LNMP配套环境，使用phpmyadmin管理任务
+
+安装步骤可以参考
+
+- [LNMP](https://lnmp.org/)
+- [PHPstudy](https://www.xp.cn/)
+
+当然，你使用原生的Nginx+PHP+Mysql+数据库管理界面也完全可以。
+
+RabbitMQ建议安装在另外的机器上，安装RabbitMQ之前需要先安装Erlang环境
+
+具体可以参考
+[https://www.rabbitmq.com/download.html](https://www.rabbitmq.com/download.html)
+
+LSipder的配置与下面的配置文件相当即可。
+
 # 配置LSpider
 
 ## 下载LSpider
@@ -75,12 +93,18 @@ Google Chrome 81.0.4044.138
 
 去官网下载对应版本的webdriver放在bin目录下
 
-```
-https://chromedriver.chromium.org/downloads
-```
+[https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads)
 
 修改名字
 ```bash
 mv bin/chromedriver bin/chromedriver_linux64
 
 ```
+
+chromedriver的名字需要符合
+```
+linux   chromedriver_linux64
+windows chromedriver_win32.exe
+mac     chromedriver_mac64
+```
+
