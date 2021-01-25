@@ -88,7 +88,11 @@ DATABASES = {
         'OPTIONS': {
             'init_command': 'SET default_storage_engine=INNODB;SET NAMES utf8mb4',
             'charset': 'utf8mb4',
-        }
+        },
+        'TEST': {
+            'CHARSET': 'utf8',
+            'COLLATION': 'utf8_general_ci',
+        },
     }
 }
 
@@ -163,7 +167,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.path.join(BASE_DIR, '/static/')
+
+CHROME_DOWNLOAD_PATH = '/tmp/lspider'
+
+# Chrome webdriver
+CHROME_WEBDRIVER_PATH = os.path.join(BASE_DIR, 'bin/')
 
 
 # Chrome webdriver
@@ -201,3 +210,6 @@ WECHAT_NOTICE = {
     'secret': ' ',
     'agent_id': ' ',
 }
+
+# for test
+IS_TEST_ENVIRONMENT = False
