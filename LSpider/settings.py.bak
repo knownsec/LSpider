@@ -211,5 +211,11 @@ WECHAT_NOTICE = {
     'agent_id': ' ',
 }
 
+WECHAT_NOTICE_DEBUG = {
+    'corp_id': ' ',
+    'secret': ' ',
+    'agent_id': ' ',
+}
+
 # for test
 IS_TEST_ENVIRONMENT = False
