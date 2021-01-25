@@ -602,7 +602,6 @@ class ChromeDriver:
 if __name__ == "__main__":
     Req = ChromeDriver()
 
-    Req.get_resp("http://152.136.99.52/phpmyadmin_s3cr3t/sql.php?server=1&db=lspider&table=spider_subdomainlist&pos=0",
-                 isclick=False)
+    Req.get_resp("http://baidu.com", isclick=False)
 
     # print(Req.get_resp("https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"))
