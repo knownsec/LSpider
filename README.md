@@ -79,70 +79,11 @@ python3 manage.py SpiderCoreBackendStart --test
 
 # 一些关键的配置
 
-Mysql配置
-```
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'LSpider',
-        'USER': 'root',
-        'PASSWORD': 'lspider123!@#',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': 'SET default_storage_engine=INNODB;SET NAMES utf8mb4',
-            'charset': 'utf8mb4',
-        }
-    }
-}
-```
+[配置说明](./docs/config.md)
 
-LIMIT_DEEP为爬虫深度，即从目标开始直到第几层不再继续
-THREADPOOL_MAX_THREAD_NUM 线程池数量
-```
-LIMIT_DEEP = 2
-THREADPOOL_MAX_THREAD_NUM = 5
-```
+# 如何配置扫描任务 以及 其他的配置相关
 
-RabbitMQ配置，值得注意的是，建议使用RabbitMQ，因为基于队列的任务管理非常容易爆内存，无法解决。
-```
-# rabbitmq
-RABBITMQ_IP = ""
-RABBITMQ_PORT = ""
-RABBITMQ_USERNAME = ""
-RABBITMQ_PASSWORD = ""
-RABBITMQ_VHOST = ""
-
-# wheather open rabbitmq
-IS_OPEN_RABBITMQ = True
-```
-
-Chrome Headless配置，将被动扫描器的代理填写在这里
-```
-# proxy for chrome headless
-IS_OPEN_CHROME_PROXY = False
-CHROME_PROXY = '127.0.0.1:7777'
-```
-
-Hackerone 账号配置
-```
-# for hackerone
-HACKERONE_USERNAME = ""
-HACKERONE_PASSWORD = ""
-```
-
-是否开启微信推送（配合webhook）,相关配置是推送到企业微信小程序的。
-```
-# loghander
-LOGHANDER_IS_OPEN_WEIXIN = False
-
-# for weixin
-WECHAT_NOTICE = {
-    'corp_id': ' ',
-    'secret': ' ',
-    'agent_id': ' ',
-}
-```
+[如何配置扫描任务 以及 其他的配置相关](./docs/manage.md)
 
 # 404StarLink
 ![](https://github.com/knownsec/404StarLink-Project/raw/master/logo.png)

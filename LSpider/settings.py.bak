@@ -174,10 +174,6 @@ CHROME_DOWNLOAD_PATH = '/tmp/lspider'
 # Chrome webdriver
 CHROME_WEBDRIVER_PATH = os.path.join(BASE_DIR, 'bin/')
 
-
-# Chrome webdriver
-CHROME_WEBDRIVER_PATH = os.path.join(BASE_DIR, 'bin/')
-
 # setting for spider
 
 LIMIT_DEEP = 2
