@@ -83,7 +83,26 @@ python3 manage.py SpiderCoreBackendStart --test
 
 # 如何配置扫描任务 以及 其他的配置相关
 
+其中包含了如何配置扫描任务、鉴权信息、webhook。
+
+值得注意的是，文中提到的Cookie配置，格式为浏览器请求包复制即可。
+
 [如何配置扫描任务 以及 其他的配置相关](./docs/manage.md)
+
+# 使用内置的hackerone、bugcrowd爬虫获取目标
+
+使用hackerone爬虫，你需要首先配置好hackerone账号
+```
+ python3 .\manage.py HackeroneSpider {appname}
+```
+![](./4.png)
+
+同理，bugcrowd使用
+```
+ python3 .\manage.py BugcrowdSpider {appname}
+```
+
+![](./5.png)
 
 # 404StarLink
 ![](https://github.com/knownsec/404StarLink-Project/raw/master/logo.png)
