@@ -95,14 +95,14 @@ python3 manage.py SpiderCoreBackendStart --test
 ```
  python3 .\manage.py HackeroneSpider {appname}
 ```
-![](./4.png)
+![](./docs/4.png)
 
 同理，bugcrowd使用
 ```
  python3 .\manage.py BugcrowdSpider {appname}
 ```
 
-![](./5.png)
+![](./docs/5.png)
 
 # 404StarLink
 ![](https://github.com/knownsec/404StarLink-Project/raw/master/logo.png)
