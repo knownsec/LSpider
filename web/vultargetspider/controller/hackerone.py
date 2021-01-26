@@ -11,13 +11,13 @@
 
 import re
 import time
-import requests
+import selenium
 import traceback
 from core.chromeheadless import ChromeDriver
 from utils.log import logger
 from LSpider.settings import HACKERONE_USERNAME, HACKERONE_PASSWORD
 
-from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 from bs4 import BeautifulSoup
 
 
@@ -44,6 +44,10 @@ class HackeroneSpider:
         code, content, title = self.chromeclass.get_resp(url, isclick=False)
         time.sleep(5)
 
+        if "Page not found" in content:
+            logger.warn("[Hackerone spider] Not Found App {}".format(appname))
+            return []
+
         result = self.html_parse()
 
         return result
@@ -57,19 +61,24 @@ class HackeroneSpider:
 
             try:
                 domain = td.find_element_by_tag_name("strong").text.strip()
+                result_list.append(domain.replace("*.", ""))
 
-                url_list = td.find_element_by_tag_name('p').text
-                for url in url_list.split("\n"):
-                    if url.startswith("/"):
-                        u = "http://" + domain + url.strip()
+                if td.find_element_by_tag_name('p'):
+                    url_list = td.find_element_by_tag_name('p').text
+                    for url in url_list.split("\n"):
+                        if url.startswith("/"):
+                            u = "http://" + domain + url.strip()
 
-                        # replace {} () <>
-                        u = re.sub(r'[({<][^)}>]*[)}>]', '1', u)
+                            # replace {} () <>
+                            u = re.sub(r'[({<][^)}>]*[)}>]', '1', u)
 
-                        result_list.append(u.replace("*.", ""))
+                            result_list.append(u.replace("*.", ""))
 
+            except NoSuchElementException:
+                logger.warn("[Hackerone spider][parse] Not Found child element.")
+                continue
             except:
-                logger.warnning("[Hackerone spider][parse] url data parse error. {}".format(traceback.format_exc()))
+                logger.warn("[Hackerone spider][parse] url data parse error. {}".format(traceback.format_exc()))
                 continue
 
         return result_list

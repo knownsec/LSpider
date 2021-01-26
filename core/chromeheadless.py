@@ -26,15 +26,7 @@ from urllib.parse import urlparse
 from LSpider.settings import CHROME_WEBDRIVER_PATH, CHROME_PROXY, IS_OPEN_CHROME_PROXY
 from LSpider.settings import CHROME_DOWNLOAD_PATH, IS_TEST_ENVIRONMENT
 from utils.log import logger
-
-
-def random_string(length=8):
-    seed = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+=-"
-    sa = []
-    for i in range(length):
-        sa.append(random.choice(seed))
-    salt = ''.join(sa)
-    return salt
+from utils.base import random_string
 
 
 class ChromeDriver:
