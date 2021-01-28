@@ -29,7 +29,7 @@ enterprise_debug = WeChatClient(
 def send_text(content):
     enterprise.message.send_text(
         agent_id=WECHAT_NOTICE['agent_id'],
-        user_ids='guoyingqi0',
+        user_ids='',
         tag_ids='',
         content=content,
         # title="HaoTian 实时监控警报"
@@ -39,7 +39,7 @@ def send_text(content):
 def send_text_admin(content):
     enterprise_debug.message.send_text(
         agent_id=WECHAT_NOTICE_DEBUG['agent_id'],
-        user_ids='guoyingqi0',
+        user_ids='',
         tag_ids='',
         content=content,
         # title="HaoTian 实时监控警报"
@@ -49,7 +49,7 @@ def send_text_admin(content):
 def send_text_card(title, description, url='#'):
     enterprise.message.send_text_card(
         agent_id=WECHAT_NOTICE['agent_id'],
-        user_ids='guoyingqi0',
+        user_ids='',
         tag_ids='',
         title=title,
         description=description,
