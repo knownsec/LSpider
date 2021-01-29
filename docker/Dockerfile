@@ -8,7 +8,7 @@ Label author "qboy0000<2006qgw@163.com>"
 
 ENV XARY 1.7.0
 ENV PYTHON3 3.7.9
-ENV CHROMEDRIVER_VERSION 89.0.4389.23
+ENV CHROMEDRIVER_VERSION 88.0.4324.96
 
 # RUN sed -i 's/http:\/\/archive.ubuntu.com/http:\/\/mirrors.huaweicloud.com/g' /etc/apt/sources.list && \
 #     sed -i 's/http:\/\/security.ubuntu.com/http:\/\/mirrors.huaweicloud.com/g' /etc/apt/sources.list && \
@@ -24,7 +24,7 @@ RUN set -x && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/re
 	echo "Asia/Shanghai" > /etc/timezone && \
 	cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
 	# dpkg-reconfigure -f noninteractive tzdata && \
-    apk add --no-cache musl-dev linux-headers  git wget curl unzip mysql-client mariadb-dev make gcc && \
+    apk add --no-cache musl-dev linux-headers  git wget curl unzip mysql-client mariadb-dev make gcc chromium chromium-chromedriver && \
 
 # update python3 to 3.7
     # wget https://www.python.org/ftp/python/$PYTHON3/Python-$PYTHON3.tar.xz -O /tmp/Python-$PYTHON3.tar.xz && \
@@ -39,10 +39,10 @@ RUN set -x && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/re
     mkdir -p /opt/xray && \
     unzip /tmp/xray_linux_amd64.zip -d /opt/xray && \
 
-    wget http://npm.taobao.org/mirrors/chromedriver/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -O /tmp/chromedriver_linux64.zip && \
-    mkdir /opt/LSpider/bin && \
-    unzip /tmp/chromedriver_linux64.zip -d /opt/LSpider/bin && \
-    mv /opt/LSpider/bin/chromedriver /opt/LSpider/bin/chromedriver_linux64 && \
+    # wget http://npm.taobao.org/mirrors/chromedriver/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -O /tmp/chromedriver_linux64.zip && \
+    # mkdir /opt/LSpider/bin && \
+    # unzip /tmp/chromedriver_linux64.zip -d /usr/bin && \
+    # mv /usr/bin/chromedriver /usr/bin/chromedriver_linux64 && \
 
     rm -rf /tmp/* && \
     apk del make gcc git
@@ -51,6 +51,7 @@ WORKDIR /opt/LSpider/
 COPY ./docker-entrypoint.sh /opt/LSpider/docker-entrypoint.sh
 COPY ./settings.py /opt/LSpider/LSpider/settings.py 
 COPY ./xray.sh /opt/LSpider/xray.sh
+COPY ./chromeheadless.py /opt/LSpider/core/
 
 RUN chmod a+x /opt/LSpider/docker-entrypoint.sh && \
     chmod a+x /opt/LSpider/*.sh
