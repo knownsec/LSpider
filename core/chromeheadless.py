@@ -115,7 +115,6 @@ class ChromeDriver:
         self.chrome_options.add_argument(
             'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
 
-        print("====>chromedriver_path:{}".format(self.chromedriver_path))
         self.driver = webdriver.Chrome(chrome_options=self.chrome_options, executable_path=self.chromedriver_path,
                                        desired_capabilities=desired_capabilities)
 
