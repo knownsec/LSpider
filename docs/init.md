@@ -91,7 +91,7 @@ lorexxar@instance-1:~/lorexxar/lspider/LSpider$ google-chrome --version
 Google Chrome 81.0.4044.138 
 ```
 
-去官网下载对应版本的webdriver放在bin目录下
+去官网下载对应版本的webdriver放在当前目录的bin文件夹下
 
 [https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads)
 
