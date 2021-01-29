@@ -97,7 +97,7 @@ Google Chrome 81.0.4044.138
 
 修改名字
 ```bash
-mv bin/chromedriver bin/chromedriver_linux64
+mv ./bin/chromedriver ./bin/chromedriver_linux64
 
 ```
 
