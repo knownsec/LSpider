@@ -60,6 +60,8 @@ python3 manage.py SpiderCoreBackendStart --test
 
 **值得注意的是，以下脚本可能会涉及到项目路径影响，使用前请修改相应的配置**
 
+建议配合screen来挂起进程
+
 启动LSpider webhook 与漏洞展示页面（默认端口2062）
 
 ```
