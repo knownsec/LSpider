@@ -60,7 +60,7 @@ python3 manage.py SpiderCoreBackendStart --test
 
 **值得注意的是，以下脚本可能会涉及到项目路径影响，使用前请修改相应的配置**
 
-启动LSpider webhook（默认端口2062）
+启动LSpider webhook 与漏洞展示页面（默认端口2062）
 
 ```
 ./lspider_webhook.sh
@@ -92,6 +92,10 @@ python3 manage.py SpiderCoreBackendStart --test
 值得注意的是，文中提到的Cookie配置，格式为浏览器请求包复制即可。
 
 [如何配置扫描任务 以及 其他的配置相关](./docs/manage.md)
+
+扫描器结果输出到配置文件相同目录（默认为vuls/）,则可以通过web界面访问。
+
+![](./docs/6.png)
 
 # 使用内置的hackerone、bugcrowd爬虫获取目标
 

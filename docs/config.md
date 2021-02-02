@@ -80,6 +80,16 @@ WECHAT_NOTICE_DEBUG = {
 }
 ```
 
+这个配置是关于被动扫描器的输出位置，这里默认为当前目录的vuls，其中对应的web界面也为相同路径。
+```
+# for xray result
+VUL_LIST_PATH = os.path.join(BASE_DIR, 'vuls/')
+
+if os.path.isdir(VUL_LIST_PATH) is not True:
+    os.mkdir(VUL_LIST_PATH)
+```
+
+
 如果开启这个配置，Chrome webdriver 会以非headless的模式启动，便于调试环境
 ```
 # for test 
