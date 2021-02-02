@@ -51,6 +51,7 @@ class VulFileListView(View):
             else:
                 self.file_list.append(filename)
 
+        self.file_list.sort(reverse=True)
         data = {'filelist': self.file_list}
 
         return render(request, 'Vullist.html', data)
