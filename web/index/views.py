@@ -35,7 +35,6 @@ class VulFileListView(View):
         now_vul_path = os.path.join(VUL_LIST_PATH, filepath)
 
         if os.path.isfile(now_vul_path):
-            os.chmod(now_vul_path, 0o644)
 
             content = codecs.open(now_vul_path, 'r+', encoding='utf-8', errors='ignore')
             return HttpResponse(content)
