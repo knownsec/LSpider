@@ -26,12 +26,12 @@ class VulFileListView(View):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get(self, request, path=""):
+    def get(self, request, filepath=""):
 
-        if path and ('./' in path or '..' in path):
+        if filepath and ('./' in filepath or '..' in filepath):
             return HttpResponse("Go back. Hacker~")
 
-        now_vul_path = os.path.join(VUL_LIST_PATH, path)
+        now_vul_path = os.path.join(VUL_LIST_PATH, filepath)
 
         if os.path.isfile(now_vul_path):
             return render(request, now_vul_path)
