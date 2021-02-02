@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 import json
 import time
+import codecs
 
 from django.views import View
 from django.shortcuts import render
@@ -34,7 +35,10 @@ class VulFileListView(View):
         now_vul_path = os.path.join(VUL_LIST_PATH, filepath)
 
         if os.path.isfile(now_vul_path):
-            return render(request, now_vul_path)
+            os.chmod(now_vul_path, 0o644)
+
+            content = codecs.open(now_vul_path, 'r+', encoding='utf-8', errors='ignore')
+            return HttpResponse(content)
 
         if not os.path.isdir(now_vul_path):
             return HttpResponse("Bad Request. VUL_LIST_PATH needs to be configured or current path Error.")
