@@ -417,7 +417,7 @@ class ChromeDriver:
     def click_button(self):
 
         try:
-            submit_buttons = self.driver.find_element_by_xpath("//input[@type='submit']")
+            submit_buttons = self.driver.find_elements_by_xpath("//input[@type='submit']")
 
             submit_buttons_len = len(submit_buttons)
 
