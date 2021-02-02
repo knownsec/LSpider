@@ -1,0 +1,9 @@
+{% block title %}Vulfile list{% endblock %}
+
+{% block body %}
+
+    {% for file in filelist %}
+        <a href="{% url 'index:vullist' file %}">={{ file }}</a>
+    {% endfor %}
+
+{% endblock %}

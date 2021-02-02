@@ -213,5 +213,11 @@ WECHAT_NOTICE_DEBUG = {
     'agent_id': ' ',
 }
 
+# for xray result
+VUL_LIST_PATH = os.path.join(BASE_DIR, 'vuls/')
+
+if os.path.isdir(VUL_LIST_PATH) is not True:
+    os.mkdir(VUL_LIST_PATH)
+
 # for test
 IS_TEST_ENVIRONMENT = False
