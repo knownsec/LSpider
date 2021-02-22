@@ -52,7 +52,7 @@ class ChromeDriver:
         if os.name == 'nt':
             self.chromedriver_path = os.path.join(self.chromedriver_path, "chromedriver_win32.exe")
         elif os.name == 'posix':
-            self.chromedriver_path = os.path.join(self.chromedriver_path, "chromedriver_linux64")
+            self.chromedriver_path = os.path.join(self.chromedriver_path, "chromedriver")
         else:
             self.chromedriver_path = os.path.join(self.chromedriver_path, "chromedriver_mac64")
 
@@ -417,7 +417,7 @@ class ChromeDriver:
     def click_button(self):
 
         try:
-            submit_buttons = self.driver.find_elements_by_xpath("//input[@type='submit']")
+            submit_buttons = self.driver.find_element_by_xpath("//input[@type='submit']")
 
             submit_buttons_len = len(submit_buttons)
 

@@ -25,7 +25,7 @@ SECRET_KEY = 'this_is_a_secret_key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -82,8 +82,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'LSpider',
         'USER': 'root',
-        'PASSWORD': 'lspider123!@#',
-        'HOST': '127.0.0.1',
+        'PASSWORD': 'mysql@lspider',
+        'HOST': 'mysql',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': 'SET default_storage_engine=INNODB;SET NAMES utf8mb4',
@@ -180,17 +180,17 @@ LIMIT_DEEP = 2
 THREADPOOL_MAX_THREAD_NUM = 5
 
 # rabbitmq
-RABBITMQ_IP = ""
-RABBITMQ_PORT = ""
-RABBITMQ_USERNAME = ""
-RABBITMQ_PASSWORD = ""
-RABBITMQ_VHOST = ""
+RABBITMQ_IP = "rabbitmq"
+RABBITMQ_PORT = "5672"
+RABBITMQ_USERNAME = "user"
+RABBITMQ_PASSWORD = "rabbitmq@lspider"
+RABBITMQ_VHOST = "lspider_vhost"
 
 # wheather open rabbitmq
 IS_OPEN_RABBITMQ = True
 
 # proxy for chrome headless
-IS_OPEN_CHROME_PROXY = False
+IS_OPEN_CHROME_PROXY = True
 CHROME_PROXY = '127.0.0.1:7777'
 
 # for hackerone

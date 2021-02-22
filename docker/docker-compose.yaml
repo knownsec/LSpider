@@ -1,0 +1,56 @@
+version: "2.0"
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    hostname: mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql@lspider
+  phpmyadmin:
+    image: phpmyadmin:5.0.4-apache
+    container_name: myadmin
+    hostname: myadmin
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql@lspider
+      - PMA_HOST=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=phpmyadmin@123
+    ports:
+      - 2063:80
+    links:
+      - mysql
+    depends_on: ['mysql']
+  rabbitmq:
+    image: rabbitmq:3
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=rabbitmq@lspider
+      - RABBITMQ_DEFAULT_VHOST=lspider_vhost
+  lspider:
+    build: .
+    container_name: lspider
+    hostname: lspider
+    restart: always
+    environment:
+      - RABBITMQ_IP=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=user
+      - RABBITMQ_PASSWORD=rabbitmq@lspider
+      - RABBITMQ_VHOST=lspider_vhost
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=mysql@lspider
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DBName=LSpider
+    ports:
+      - 2062:2062
+    links:
+      - mysql
+      - rabbitmq
+    depends_on: ['mysql','rabbitmq']

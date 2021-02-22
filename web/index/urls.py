@@ -21,5 +21,7 @@ app_name = "index"
 urlpatterns = [
     path("", views.index),
 
+    path("vuls/", views.VulFileListView.as_view(), name="vullist"),
+    path("vuls/<str:filepath>", views.VulFileListView.as_view(), name="vulpath"),
     path("webhook", csrf_exempt(views.WebhookView.as_view()), name="webhook"),
 ]

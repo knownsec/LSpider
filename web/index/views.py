@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import json
 import time
+import codecs
 
 from django.views import View
 from django.shortcuts import render
@@ -10,9 +12,49 @@ from django.http import HttpResponse
 
 from utils.wechathandler import ReMess
 
+from LSpider.settings import VUL_LIST_PATH
+
 
 def index(req):
     return HttpResponse("Hello Lspider.")
+
+
+class VulFileListView(View):
+    """
+    扫描器结果展示列表
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def get(self, request, filepath=""):
+
+        if filepath and ('./' in filepath or '..' in filepath):
+            return HttpResponse("Go back. Hacker~")
+
+        now_vul_path = os.path.join(VUL_LIST_PATH, filepath)
+
+        if os.path.isfile(now_vul_path):
+
+            content = codecs.open(now_vul_path, 'r+', encoding='utf-8', errors='ignore')
+            return HttpResponse(content)
+
+        if not os.path.isdir(now_vul_path):
+            return HttpResponse("Bad Request. VUL_LIST_PATH needs to be configured or current path Error.")
+
+        self.file_list = []
+
+        for filename in os.listdir(now_vul_path):
+            if os.path.isdir(os.path.join(now_vul_path, filename)):
+                self.file_list.append("{}/".format(filename))
+
+            else:
+                self.file_list.append(filename)
+
+        self.file_list.sort(reverse=True)
+        data = {'filelist': self.file_list}
+
+        return render(request, 'Vullist.html', data)
 
 
 class WebhookView(View):

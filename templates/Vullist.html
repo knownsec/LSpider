@@ -1,0 +1,9 @@
+{% block title %}Vulfile list:<br />{% endblock %}
+
+{% block body %}
+
+    {% for file in filelist %}
+        <a href="{% url 'index:vulpath' file %}">{{ file }}</a><br />
+    {% endfor %}
+
+{% endblock %}
