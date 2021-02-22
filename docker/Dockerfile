@@ -49,12 +49,11 @@ RUN set -x && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/re
 
 WORKDIR /opt/LSpider/
 COPY ./docker-entrypoint.sh /opt/LSpider/docker-entrypoint.sh
-COPY ./settings.py /opt/LSpider/LSpider/settings.py 
+COPY ./settings.py.docker.bak /opt/LSpider/LSpider/settings.py
 COPY ./xray.sh /opt/LSpider/xray.sh
 COPY ./chromeheadless.py /opt/LSpider/core/
 
-RUN chmod a+x /opt/LSpider/docker-entrypoint.sh && \
-    chmod a+x /opt/LSpider/*.sh
+RUN chmod a+x /opt/LSpider/*.sh
 
 EXPOSE 2062
 
