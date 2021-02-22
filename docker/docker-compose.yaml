@@ -19,7 +19,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=phpmyadmin@123
     ports:
-      - 8080:80
+      - 2063:80
     links:
       - mysql
     depends_on: ['mysql']

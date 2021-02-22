@@ -8,10 +8,10 @@ docker-compose up -d
 
 ## 结果访问
 ```
-http://127.0.0.1:2602/vuls/
+http://127.0.0.1:2062/vuls/
 ```
 
-## docker 访问
+## phpmyadmin访问
 ```
-http://127.0.0.1:2602
+http://127.0.0.1:2063
 ```
