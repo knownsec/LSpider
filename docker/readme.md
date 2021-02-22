@@ -6,6 +6,11 @@
 docker-compose up -d
 ```
 
+## 结果访问
+```
+http://127.0.0.1:2602/vuls/
+```
+
 ## docker 访问
 ```
 http://127.0.0.1:2602
