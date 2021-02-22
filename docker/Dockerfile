@@ -44,8 +44,7 @@ RUN set -x && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/re
     # unzip /tmp/chromedriver_linux64.zip -d /usr/bin && \
     # mv /usr/bin/chromedriver /usr/bin/chromedriver_linux64 && \
 
-    rm -rf /tmp/* && \
-    apk del make gcc git
+    rm -rf /tmp/*
 
 WORKDIR /opt/LSpider/
 COPY ./docker-entrypoint.sh /opt/LSpider/docker-entrypoint.sh
