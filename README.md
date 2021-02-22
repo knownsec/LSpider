@@ -58,6 +58,17 @@ LSpider从设计之初是为了配合像xray这种被动扫描器而诞生的，
 python3 manage.py SpiderCoreBackendStart --test
 ```
 
+通过dockerfile安装（不推荐的安装模式）
+```
+cd ./docker
+
+docker-compose up -d
+```
+
+[dockerfile 安装&使用](./docker/readme.md)
+
+**使用dockerfile安装，推荐修改其中必要的配置信息以避免安全漏洞诞生。**
+
 **值得注意的是，以下脚本可能会涉及到项目路径影响，使用前请修改相应的配置**
 
 建议配合screen来挂起进程
@@ -113,6 +124,12 @@ python3 manage.py SpiderCoreBackendStart --test
 ```
 
 ![](./docs/5.png)
+
+# Contributors
+
+感谢如下贡献者对本工具发展过程中的贡献：
+
+- [QGW](https://github.com/qboy0000)
 
 # 404StarLink
 ![](https://github.com/knownsec/404StarLink-Project/raw/master/logo.png)
