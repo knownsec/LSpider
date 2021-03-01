@@ -213,6 +213,9 @@ WECHAT_NOTICE_DEBUG = {
     'agent_id': ' ',
 }
 
+WECHAT_ADMIN_LIST = ['']
+WECHAT_USER_LIST = ['']
+
 # for xray result
 VUL_LIST_PATH = os.path.join(BASE_DIR, 'vuls/')
 
