@@ -41,29 +41,44 @@ def html_parser(content):
     try:
         soup = BeautifulSoup(content, "html.parser")
 
-        script_tag_list = soup.find_all('script')
+        linkDict = {
+            'href': ('a', 'area', 'base', 'link',),
+            'src': ('iframe', 'frame', 'script', 'embed',),
+            # 'data': ('object',),
+            'action': ('form',),
+        }
 
-        for script_tag in script_tag_list:
-            if script_tag.get('src'):
-                result_list.append({"type": "link", "url": script_tag.get('src')})
+        for attribute in linkDict:
+            for tag in linkDict[attribute]:
+                tag_list = soup.find_all(tag)
 
-        link_tag_list = soup.find_all('a')
+                for tag_obj in tag_list:
+                    if tag_obj.get(attribute):
+                        result_list.append({"type": "link", "url": tag_obj.get(attribute)})
 
-        for link_tag in link_tag_list:
-            if link_tag.get('href'):
-                result_list.append({"type": "link", "url": link_tag.get('href')})
-
-        form_tag_list = soup.find_all('form')
-
-        for form_tag in form_tag_list:
-            if form_tag.get('action'):
-                result_list.append({"type": "link", "url": form_tag.get('action')})
-
-        iframe_tag_list = soup.find_all('iframe')
-
-        for iframe_tag in iframe_tag_list:
-            if iframe_tag.get('src'):
-                result_list.append({"type": "link", "url": iframe_tag.get('src')})
+        # script_tag_list = soup.find_all('script')
+        #
+        # for script_tag in script_tag_list:
+        #     if script_tag.get('src'):
+        #         result_list.append({"type": "link", "url": script_tag.get('src')})
+        #
+        # link_tag_list = soup.find_all('a')
+        #
+        # for link_tag in link_tag_list:
+        #     if link_tag.get('href'):
+        #         result_list.append({"type": "link", "url": link_tag.get('href')})
+        #
+        # form_tag_list = soup.find_all('form')
+        #
+        # for form_tag in form_tag_list:
+        #     if form_tag.get('action'):
+        #         result_list.append({"type": "link", "url": form_tag.get('action')})
+        #
+        # iframe_tag_list = soup.find_all('iframe')
+        #
+        # for iframe_tag in iframe_tag_list:
+        #     if iframe_tag.get('src'):
+        #         result_list.append({"type": "link", "url": iframe_tag.get('src')})
 
         # for script
         if not soup.body:

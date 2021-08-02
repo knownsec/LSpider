@@ -13,6 +13,7 @@ from utils.log import logger
 from wechatpy.enterprise import WeChatClient
 from LSpider.settings import LOGHANDER_IS_OPEN_WEIXIN
 from LSpider.settings import WECHAT_NOTICE, WECHAT_NOTICE_DEBUG
+from LSpider.settings import WECHAT_ADMIN_LIST, WECHAT_USER_LIST
 
 
 enterprise = WeChatClient(
@@ -29,7 +30,7 @@ enterprise_debug = WeChatClient(
 def send_text(content):
     enterprise.message.send_text(
         agent_id=WECHAT_NOTICE['agent_id'],
-        user_ids='',
+        user_ids=WECHAT_USER_LIST,
         tag_ids='',
         content=content,
         # title="HaoTian 实时监控警报"
@@ -39,7 +40,7 @@ def send_text(content):
 def send_text_admin(content):
     enterprise_debug.message.send_text(
         agent_id=WECHAT_NOTICE_DEBUG['agent_id'],
-        user_ids='',
+        user_ids=WECHAT_ADMIN_LIST,
         tag_ids='',
         content=content,
         # title="HaoTian 实时监控警报"
