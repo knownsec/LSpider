@@ -24,7 +24,7 @@ services:
       - mysql
     depends_on: ['mysql']
   rabbitmq:
-    image: rabbitmq:3
+    image: rabbitmq:3.8
     container_name: rabbitmq
     hostname: rabbitmq
     restart: always
