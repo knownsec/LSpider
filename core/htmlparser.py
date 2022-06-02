@@ -53,8 +53,8 @@ def html_parser(content):
                 tag_list = soup.find_all(tag)
 
                 for tag_obj in tag_list:
-                    if tag_obj.get(attribute):
-                        result_list.append({"type": "link", "url": tag_obj.get(attribute)})
+                    if get(attribute):
+                        result_list.append({"type": "link", "url": get(attribute)})
 
         # script_tag_list = soup.find_all('script')
         #
