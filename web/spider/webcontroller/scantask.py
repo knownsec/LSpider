@@ -43,8 +43,8 @@ class ScanTaskListView(View):
             size = int(request.GET['size'])
 
         if "target" in request.GET or "task_name" in request.GET:
-            target = request.GET['target']
-            task_name = request.GET['task_name']
+            target = request.GET['target'] if 'target' in request.GET else ""
+            task_name = request.GET['task_name'] if 'task_name' in request.GET else ""
 
         if target or task_name:
             sts = ScanTask.objects.filter(target__contains=target, task_name__contains=task_name).values()[(page - 1) * size:page * size]
@@ -257,8 +257,8 @@ class SubDomainListView(View):
             size = int(request.GET['size'])
 
         if "subdomain" in request.GET or "banner" in request.GET:
-            subdomain = request.GET['subdomain']
-            banner = request.GET['banner']
+            subdomain = request.GET['subdomain'] if 'subdomain' in request.GET else ""
+            banner = request.GET['banner'] if 'banner' in request.GET else ""
 
         if subdomain or banner:
             sdls = UrlTable.objects.filter(subdomain__contains=subdomain, banner__contains=banner).values()[(page - 1) * size:page * size]
