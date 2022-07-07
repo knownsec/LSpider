@@ -21,6 +21,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 
 from web.index.models import ScanTask, LoginPageList, BanList, AccountDataTable
+from web.spider.models import SubDomainList, UrlTable
 
 
 class ScanTaskListView(View):
@@ -33,6 +34,7 @@ class ScanTaskListView(View):
         size = 10
         page = 1
         target = ""
+        task_name = ""
 
         if "page" in request.GET:
             page = int(request.GET['page'])
@@ -40,11 +42,12 @@ class ScanTaskListView(View):
         if "size" in request.GET:
             size = int(request.GET['size'])
 
-        if "target" in request.GET:
+        if "target" in request.GET or "task_name" in request.GET:
             target = request.GET['target']
+            task_name = request.GET['task_name']
 
-        if target:
-            sts = ScanTask.objects.filter(target__contains=target).values()[(page - 1) * size:page * size]
+        if target or task_name:
+            sts = ScanTask.objects.filter(target__contains=target, task_name__contains=task_name).values()[(page - 1) * size:page * size]
         else:
             sts = ScanTask.objects.all().values()[(page - 1) * size:page * size]
         count = len(sts)
@@ -201,3 +204,68 @@ class AccountDataDetailsView(View):
         count = len(adls)
 
         return JsonResponse({"code": 200, "status": True, "message": list(adls), "total": count, })
+
+
+class UrlTableListView(View):
+    """
+        urltable
+    """
+
+    @staticmethod
+    def get(request):
+        size = 100
+        page = 1
+        domain = ""
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        if "domain" in request.GET:
+            domain = request.GET['domain']
+
+        if domain:
+            urls = UrlTable.objects.filter(domain__contains=domain).values()[(page - 1) * size:page * size]
+        else:
+            urls = UrlTable.objects.all().values()[(page - 1) * size:page * size]
+
+        count = len(urls)
+
+        urls_list = list(urls)
+
+        return JsonResponse({"code": 200, "status": True, "message": urls_list, "total": count})
+
+
+class SubDomainListView(View):
+    """
+        SubDomainList
+    """
+
+    @staticmethod
+    def get(request):
+        size = 20
+        page = 1
+        subdomain = ""
+        banner = ""
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        if "subdomain" in request.GET or "banner" in request.GET:
+            subdomain = request.GET['subdomain']
+            banner = request.GET['banner']
+
+        if subdomain or banner:
+            sdls = UrlTable.objects.filter(subdomain__contains=subdomain, banner__contains=banner).values()[(page - 1) * size:page * size]
+        else:
+            sdls = SubDomainList.objects.all().values()[(page - 1) * size:page * size]
+        count = len(sdls)
+
+        sdls_list = list(sdls)
+
+        return JsonResponse({"code": 200, "status": True, "message": sdls_list, "total": count})

@@ -36,4 +36,6 @@ urlpatterns = [
     path("/accountdatalist", scantask.AccountDataListView.as_view(), name="spider_accountdatalist"),
     path("/accountdatalist/<int:id>", scantask.AccountDataDetailsView.as_view(), name="spider_accountdatalist_detail"),
 
+    path("/urltablelist", scantask.UrlTableListView.as_view(), name="spider_urltablelist"),
+    path("/subdomainlist", scantask.SubDomainListView.as_view(), name="spider_subdomainlist"),
 ]
