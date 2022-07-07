@@ -261,7 +261,7 @@ class SubDomainListView(View):
             banner = request.GET['banner'] if 'banner' in request.GET else ""
 
         if subdomain or banner:
-            sdls = UrlTable.objects.filter(subdomain__contains=subdomain, banner__contains=banner).values()[(page - 1) * size:page * size]
+            sdls = SubDomainList.objects.filter(subdomain__contains=subdomain, banner__contains=banner).values()[(page - 1) * size:page * size]
         else:
             sdls = SubDomainList.objects.all().values()[(page - 1) * size:page * size]
         count = len(sdls)
