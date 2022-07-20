@@ -22,16 +22,21 @@ urlpatterns = [
     path("", views.index),
 
     # project
-    path("/project", project.ProjectListView.as_view(), name="project"),
-    path("/project/<int:project_id>", project.ProjectDetailsView.as_view(), name="project_detail"),
-    path("/project/<int:project_id>/assets", project.ProjectAssetsDetailsView.as_view(), name="project_assets"),
-    path("/project/<int:project_id>/ips", project.ProjectIpsDetailsView.as_view(), name="project_ips"),
+    path("/project", csrf_exempt(project.ProjectListView.as_view()), name="project"),
+    path("/project/<int:project_id>", csrf_exempt(project.ProjectDetailsView.as_view()), name="project_detail"),
 
-    path("/project/<int:project_id>/vuls", project.ProjectVulsListsView.as_view(), name="project_vuls"),
-    path("/project/<int:project_id>/vuls/<int:vul_id>", project.ProjectVulsDetailsView.as_view(), name="project_vuls_details"),
+    path("/project/<int:project_id>/assets", csrf_exempt(project.ProjectAssetsListView.as_view()), name="project_assets"),
+    path("/project/<int:project_id>/assets/<int:asset_id>", csrf_exempt(project.ProjectAssetsDetailsView.as_view()),
+         name="project_asset_detail"),
+
+    path("/project/<int:project_id>/ips", csrf_exempt(project.ProjectIpsListView.as_view()), name="project_ips"),
+    path("/project/<int:project_id>/ips/<int:ips_id>", csrf_exempt(project.ProjectIpsDetailsView.as_view()), name="project_ip_detail"),
+
+    path("/project/<int:project_id>/vuls", csrf_exempt(project.ProjectVulsListsView.as_view()), name="project_vuls"),
+    path("/project/<int:project_id>/vuls/<int:vul_id>", csrf_exempt(project.ProjectVulsDetailsView.as_view()), name="project_vuls_details"),
 
     # options
-    path("/options/vultype", options.VulTypeListView.as_view(), name="vultype"),
+    path("/options/vultype", csrf_exempt(options.VulTypeListView.as_view()), name="vultype"),
 
     path("/options/projectType", options.ProjectType, name="option_project_type"),
     path("/options/projectAssertsType", options.ProjectAssertsType, name="option_project_asserts_type"),

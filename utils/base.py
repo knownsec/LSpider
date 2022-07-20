@@ -82,3 +82,17 @@ def check_target(target_list):
                         result.append('http://'+target.strip())
 
     return list(set(result))
+
+
+def check_gpc_undefined(params, name, default=""):
+    """
+    检查并返回数据
+    :param request:
+    :param name:
+    :param default:
+    :return:
+    """
+    if name in params:
+        return params[name]
+
+    return default
