@@ -53,6 +53,24 @@ class ProjectListView(View):
 
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
+    @staticmethod
+    def post(request):
+        params = json.loads(request.body)
+
+        project_name = check_gpc_undefined(params, "project_name")
+        source = check_gpc_undefined(params, "source")
+        type = check_gpc_undefined(params, "type", 0)
+        description = check_gpc_undefined(params, "description")
+
+        p1 = Project.objects.filter(project_name=project_name).first()
+        if p1:
+            return JsonResponse({"code": 500, "status": False, "message": "Project {} is exists".format(project_name)})
+
+        p = Project(project_name=project_name, source=source, type=type, description=description, is_active=True)
+        p.save()
+
+        return JsonResponse({"code": 200, "status": True, "message": "New Project successful"})
+
 
 class ProjectDetailsView(View):
     """
@@ -68,29 +86,25 @@ class ProjectDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
-    def post(request):
+    def post(request, project_id):
         params = json.loads(request.body)
 
-        if "project_name" not in params:
-            return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
+        ps = Project.objects.filter(id=project_id).first()
 
         project_name = check_gpc_undefined(params, "project_name")
         source = check_gpc_undefined(params, "source")
         type = check_gpc_undefined(params, "type", 0)
         description = check_gpc_undefined(params, "description")
 
-        ps = Project.objects.filter(project_name=project_name).first()
-
-        if not ps:
+        if ps:
+            ps.project_name = project_name
             ps.source = source
             ps.type = type
             ps.description = description
             ps.save()
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
-
-        ps2 = Project(project_name=project_name, source=source, type=type, description=description, is_active=True)
-        ps2.save()
-        return JsonResponse({"code": 200, "status": True, "message": "New project insert successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "Project not found"})
 
 
 class ProjectAssetsListView(View):
@@ -286,9 +300,9 @@ class ProjectVulsListsView(View):
         name = check_gpc_undefined(params, "name")
         vultype_id = check_gpc_undefined(params, "vultype_id", 1)
         severity = check_gpc_undefined(params, "severity", 0)
-        detail = check_gpc_undefined(params, "detail")
+        details = check_gpc_undefined(params, "details")
 
-        pv = ProjectVuls(project_id=project_id, name=name, vultype_id=vultype_id, severity=severity, detail=detail, is_active=True)
+        pv = ProjectVuls(project_id=project_id, name=name, vultype_id=vultype_id, severity=severity, details=details, is_active=True)
         pv.save()
         return JsonResponse({"code": 200, "status": True, "message": "New project Vuls successful"})
 
@@ -317,11 +331,11 @@ class ProjectVulsDetailsView(View):
         name = check_gpc_undefined(params, "name")
         vultype_id = check_gpc_undefined(params, "vultype_id", 1)
         severity = check_gpc_undefined(params, "severity", 0)
-        detail = check_gpc_undefined(params, "detail")
+        details = check_gpc_undefined(params, "details")
 
         pv.name = name
         pv.vultype_id = vultype_id
         pv.severity = severity
-        pv.detail = detail
+        pv.details = details
         pv.save()
         return JsonResponse({"code": 200, "status": True, "message": "update successful"})
