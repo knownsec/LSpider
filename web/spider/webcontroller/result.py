@@ -21,6 +21,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 
 from web.index.models import ScanTask, LoginPageList, BanList, AccountDataTable
+from web.dashboard.models import Project
 
 
 class ProjectListView(View):

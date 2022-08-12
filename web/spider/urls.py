@@ -22,20 +22,23 @@ app_name = "spider"
 urlpatterns = [
     path("", views.index),
 
-    path("/profile", profile.ProfileView.as_view(), name="spider_profile"),
+    path("profile", profile.ProfileView.as_view(), name="spider_profile"),
 
-    path("/scantask", scantask.ScanTaskListView.as_view(), name="spider_scantask"),
-    path("/scantask/<int:task_id>", scantask.ScanTaskDetailsView.as_view(), name="spider_scantask_detail"),
+    path("scantask", csrf_exempt(scantask.ScanTaskListView.as_view()), name="spider_scantask"),
+    path("scantask/<int:task_id>", csrf_exempt(scantask.ScanTaskDetailsView.as_view()), name="spider_scantask_detail"),
 
-    path("/banlist", scantask.BanListView.as_view(), name="spider_banlist"),
-    path("/banlist/<int:id>", scantask.BanListDetailsView.as_view(), name="spider_banlist_detail"),
+    path("banlist", csrf_exempt(scantask.BanListView.as_view()), name="spider_banlist"),
+    path("banlist/<int:id>", csrf_exempt(scantask.BanListDetailsView.as_view()), name="spider_banlist_detail"),
 
-    path("/loginpagelist", scantask.LoginPageListView.as_view(), name="spider_loginpagelist"),
-    path("/loginpagelist/<int:id>", scantask.LoginPageDetailsView.as_view(), name="spider_loginpagelist_detail"),
+    path("loginpagelist", csrf_exempt(scantask.LoginPageListView.as_view()), name="spider_loginpagelist"),
+    path("loginpagelist/<int:id>", csrf_exempt(scantask.LoginPageDetailsView.as_view()), name="spider_loginpagelist_detail"),
 
-    path("/accountdatalist", scantask.AccountDataListView.as_view(), name="spider_accountdatalist"),
-    path("/accountdatalist/<int:id>", scantask.AccountDataDetailsView.as_view(), name="spider_accountdatalist_detail"),
+    path("accountdatalist", csrf_exempt(scantask.AccountDataListView.as_view()), name="spider_accountdatalist"),
+    path("accountdatalist/<int:id>", csrf_exempt(scantask.AccountDataDetailsView.as_view()), name="spider_accountdatalist_detail"),
 
-    path("/urltablelist", scantask.UrlTableListView.as_view(), name="spider_urltablelist"),
-    path("/subdomainlist", scantask.SubDomainListView.as_view(), name="spider_subdomainlist"),
+    path("urltablelist", csrf_exempt(scantask.UrlTableListView.as_view()), name="spider_urltablelist"),
+    path("urltablelist/<int:id>", csrf_exempt(scantask.UrlTableDetailsView.as_view()), name="spider_urltablelist_detail"),
+
+    path("subdomainlist", csrf_exempt(scantask.SubDomainListView.as_view()), name="spider_subdomainlist"),
+    path("subdomainlist/<int:id>", csrf_exempt(scantask.SubDomainDetailsView.as_view()), name="spider_subdomainlist_detail"),
 ]
