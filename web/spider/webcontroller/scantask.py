@@ -307,7 +307,6 @@ class AccountDataListView(View):
         adls_list = list(adls)
 
         for ad in adls_list:
-            ad['username'] = ""
             ad['password'] = ""
             ad['iphone'] = ""
             ad['cookies'] = ""
