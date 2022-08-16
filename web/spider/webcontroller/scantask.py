@@ -52,6 +52,7 @@ class ScanTaskListView(View):
                   (page - 1) * size:page * size]
         else:
             sts = ScanTask.objects.all().values()[(page - 1) * size:page * size]
+
         count = len(sts)
 
         sts_list = list(sts)
@@ -85,6 +86,14 @@ class ScanTaskListView(View):
         s.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "New Task successful"})
+
+
+class ScanTaskListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = ScanTask.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class ScanTaskDetailsView(View):
@@ -180,6 +189,14 @@ class LoginPageListView(View):
         return JsonResponse({"code": 200, "status": True, "message": "New LoginPage successful"})
 
 
+class LoginPageListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = LoginPageList.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
+
+
 class LoginPageDetailsView(View):
     """
         登录页
@@ -251,6 +268,14 @@ class BanListView(View):
         bls.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "New Ban successful"})
+
+
+class BanListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = BanList.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class BanListDetailsView(View):
@@ -331,6 +356,14 @@ class AccountDataListView(View):
         adls.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "New Account Data successful"})
+
+
+class AccountDataListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = AccountDataTable.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class AccountDataDetailsView(View):
@@ -417,6 +450,14 @@ class UrlTableListView(View):
         urls.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "New Url successful"})
+
+
+class UrlTableListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = UrlTable.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class UrlTableDetailsView(View):
@@ -506,6 +547,14 @@ class SubDomainListView(View):
         sdls.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "New Subdomain successful"})
+
+
+class SubDomainListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = SubDomainList.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class SubDomainDetailsView(View):
