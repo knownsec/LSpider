@@ -20,7 +20,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, VulType
+from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain
 from utils.base import check_gpc_undefined
 
 
@@ -70,6 +70,17 @@ class ProjectListView(View):
         p.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "New Project successful"})
+
+
+class ProjectListCountView(View):
+    """
+        项目列表
+    """
+
+    @staticmethod
+    def get(request):
+        count = Project.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class ProjectDetailsView(View):
@@ -154,6 +165,14 @@ class ProjectAssetsListView(View):
         return JsonResponse({"code": 200, "status": True, "message": "New project asset successful"})
 
 
+class ProjectAssetsListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = ProjectAssets.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
+
+
 class ProjectAssetsDetailsView(View):
     """
         项目资产详情
@@ -234,6 +253,14 @@ class ProjectIpsListView(View):
         return JsonResponse({"code": 200, "status": True, "message": "New project ips successful"})
 
 
+class ProjectIpsListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = ProjectIps.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
+
+
 class ProjectIpsDetailsView(View):
     """
         项目资产详情
@@ -265,6 +292,99 @@ class ProjectIpsDetailsView(View):
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
         else:
             return JsonResponse({"code": 404, "status": False, "message": "ProjectAssets not found"})
+
+
+class ProjectSubdomainListView(View):
+    """
+        项目子域名资产列表
+    """
+
+    @staticmethod
+    def get(request, project_id):
+
+        ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()
+        count = len(ps)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
+
+    @staticmethod
+    def post(request, project_id):
+        params = json.loads(request.body)
+
+        if "subdomain" not in params:
+            return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
+
+        ps = ProjectSubdomain.objects.filter(id=project_id).first()
+
+        if not ps:
+            return JsonResponse({"code": 404, "status": False, "message": "ProjectSubdomain not found"})
+
+        subdomain = check_gpc_undefined(params, "subdomain")
+        title = check_gpc_undefined(params, "title")
+        banner = check_gpc_undefined(params, "banner")
+        weight = check_gpc_undefined(params, "weight", 0)
+        is_active = check_gpc_undefined(params, "is_active", 1)
+
+        ps = ProjectSubdomain.objects.filter(project_id=ps.id, subdomain=subdomain).first()
+
+        if ps:
+            ps.title = title
+            ps.banner = banner
+            ps.weight = weight
+            ps.is_active = is_active
+            ps.save()
+
+            return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+
+        ps2 = ProjectSubdomain(project_id=project_id, subdomain=subdomain, title=title,
+                               banner=banner, weight=weight, is_active=True)
+        ps2.save()
+        return JsonResponse({"code": 200, "status": True, "message": "New Project Subdomain successful"})
+
+
+class ProjectSubdomainListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = ProjectSubdomain.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count})
+
+
+class ProjectSubdomainDetailsView(View):
+    """
+        项目子域名详情
+    """
+
+    @staticmethod
+    def get(request, project_id, subdomain_id):
+
+        ps = ProjectSubdomain.objects.filter(project_id=project_id, id=subdomain_id, is_active=1).values()
+        count = len(ps)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
+
+    @staticmethod
+    def post(request, project_id, subdomain_id):
+        params = json.loads(request.body)
+        ps = ProjectSubdomain.objects.filter(id=subdomain_id).first()
+
+        subdomain = check_gpc_undefined(params, "subdomain")
+        title = check_gpc_undefined(params, "title")
+        banner = check_gpc_undefined(params, "banner")
+        weight = check_gpc_undefined(params, "weight", 0)
+        is_active = check_gpc_undefined(params, "is_active", 1)
+
+        if ps:
+            ps.subdomain = subdomain
+            ps.title = title
+            ps.banner = banner
+            ps.weight = weight
+            ps.is_active = is_active
+            ps.save()
+
+            return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "ProjectSubdomain not found"})
 
 
 class ProjectVulsListsView(View):
@@ -305,6 +425,14 @@ class ProjectVulsListsView(View):
         pv = ProjectVuls(project_id=project_id, name=name, vultype_id=vultype_id, severity=severity, details=details, is_active=True)
         pv.save()
         return JsonResponse({"code": 200, "status": True, "message": "New project Vuls successful"})
+
+
+class ProjectVulsListCountView(View):
+
+    @staticmethod
+    def get(request):
+        count = ProjectVuls.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
 
 
 class ProjectVulsDetailsView(View):

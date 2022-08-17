@@ -45,6 +45,15 @@ class VulType(models.Model):
     name = models.CharField(max_length=50)
 
 
+class ProjectSubdomain(models.Model):
+    project_id = models.IntegerField()
+    subdomain = models.CharField(max_length=200)
+    title = models.CharField(max_length=1000, null=True, default="")
+    banner = models.CharField(max_length=1000, null=True, default="")
+    weight = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=False)
+
+
 # user profile
 class UserProfile(models.Model):
     user_id = models.IntegerField()
