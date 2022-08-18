@@ -39,7 +39,7 @@ urlpatterns = [
     path("project/<int:project_id>/subdomain", csrf_exempt(project.ProjectSubdomainListView.as_view()), name="project_subdomain_vuls"),
     path("project/<int:project_id>/subdomain/count", csrf_exempt(project.ProjectSubdomainListCountView.as_view()),
          name="project_subdomain_count"),
-    path("project/<int:project_id>/subdomain/<int:vul_id>", csrf_exempt(project.ProjectSubdomainDetailsView.as_view()),
+    path("project/<int:project_id>/subdomain/<int:subdomain_id>", csrf_exempt(project.ProjectSubdomainDetailsView.as_view()),
          name="project_subdomain_details"),
 
     path("project/<int:project_id>/vuls", csrf_exempt(project.ProjectVulsListsView.as_view()), name="project_vuls"),

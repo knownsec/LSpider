@@ -168,8 +168,8 @@ class ProjectAssetsListView(View):
 class ProjectAssetsListCountView(View):
 
     @staticmethod
-    def get(request):
-        count = ProjectAssets.objects.all().count()
+    def get(request, project_id):
+        count = ProjectAssets.objects.filter(project_id=project_id).count()
         return JsonResponse({"code": 200, "status": True, "total": count })
 
 
@@ -256,8 +256,8 @@ class ProjectIpsListView(View):
 class ProjectIpsListCountView(View):
 
     @staticmethod
-    def get(request):
-        count = ProjectIps.objects.all().count()
+    def get(request, project_id):
+        count = ProjectIps.objects.filter(project_id=project_id).count()
         return JsonResponse({"code": 200, "status": True, "total": count })
 
 
@@ -314,10 +314,10 @@ class ProjectSubdomainListView(View):
         if "subdomain" not in params:
             return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
 
-        ps = ProjectSubdomain.objects.filter(id=project_id).first()
+        p = Project.objects.filter(id=project_id).first()
 
-        if not ps:
-            return JsonResponse({"code": 404, "status": False, "message": "ProjectSubdomain not found"})
+        if not p:
+            return JsonResponse({"code": 404, "status": False, "message": "Project not found"})
 
         subdomain = check_gpc_undefined(params, "subdomain")
         title = check_gpc_undefined(params, "title")
@@ -325,7 +325,7 @@ class ProjectSubdomainListView(View):
         weight = check_gpc_undefined(params, "weight", 0)
         is_active = check_gpc_undefined(params, "is_active", 1)
 
-        ps = ProjectSubdomain.objects.filter(project_id=ps.id, subdomain=subdomain).first()
+        ps = ProjectSubdomain.objects.filter(project_id=p.id, subdomain=subdomain).first()
 
         if ps:
             ps.title = title
@@ -345,8 +345,8 @@ class ProjectSubdomainListView(View):
 class ProjectSubdomainListCountView(View):
 
     @staticmethod
-    def get(request):
-        count = ProjectSubdomain.objects.all().count()
+    def get(request, project_id):
+        count = ProjectSubdomain.objects.filter(project_id=project_id).count()
         return JsonResponse({"code": 200, "status": True, "total": count})
 
 
@@ -430,8 +430,8 @@ class ProjectVulsListsView(View):
 class ProjectVulsListCountView(View):
 
     @staticmethod
-    def get(request):
-        count = ProjectVuls.objects.all().count()
+    def get(request, project_id):
+        count = ProjectVuls.objects.filter(project_id=project_id).count()
         return JsonResponse({"code": 200, "status": True, "total": count })
 
 
