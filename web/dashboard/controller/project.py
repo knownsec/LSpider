@@ -125,8 +125,16 @@ class ProjectAssetsListView(View):
 
     @staticmethod
     def get(request, project_id):
+        size = 10
+        page = 1
 
-        ps = ProjectAssets.objects.filter(project_id=project_id, is_active=1).values()
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        ps = ProjectAssets.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
         count = len(ps)
 
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
@@ -217,8 +225,16 @@ class ProjectIpsListView(View):
 
     @staticmethod
     def get(request, project_id):
+        size = 10
+        page = 1
 
-        ps = ProjectIps.objects.filter(project_id=project_id, is_active=1).values()
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        ps = ProjectIps.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
         count = len(ps)
 
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
@@ -301,8 +317,16 @@ class ProjectSubdomainListView(View):
 
     @staticmethod
     def get(request, project_id):
+        size = 10
+        page = 1
 
-        ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
         count = len(ps)
 
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
@@ -394,8 +418,16 @@ class ProjectVulsListsView(View):
 
     @staticmethod
     def get(request, project_id):
+        size = 10
+        page = 1
 
-        ps = ProjectVuls.objects.filter(project_id=project_id, is_active=1).values()
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        ps = ProjectVuls.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
         count = len(ps)
 
         ps_list = list(ps)
