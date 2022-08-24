@@ -21,6 +21,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain
+from web.spider.models import SubDomainList, UrlTable
 from utils.base import check_gpc_undefined
 
 
@@ -499,3 +500,52 @@ class ProjectVulsDetailsView(View):
         pv.details = details
         pv.save()
         return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+
+
+class ProjectUrlsListsView(View):
+    """
+        项目url列表
+    """
+
+    @staticmethod
+    def get(request, project_id):
+        size = 30
+        page = 1
+        urllist = []
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        sds = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1)
+
+        for sd in sds:
+            urls = UrlTable.objects.filter(domain=sd.subdomain).values()
+
+            for u in urls:
+                urllist.append(u)
+
+        urllist = urllist[(page - 1) * size:page * size]
+        count = len(urllist)
+
+        return JsonResponse({"code": 200, "status": True, "message": urllist, "total": count})
+
+
+class ProjectUrlsListCountView(View):
+
+    @staticmethod
+    def get(request, project_id):
+        urllist = []
+
+        sds = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1)
+
+        for sd in sds:
+            urls = UrlTable.objects.filter(domain=sd.subdomain).values()
+
+            for u in urls:
+                urllist.append(u)
+
+        count = len(urllist)
+        return JsonResponse({"code": 200, "status": True, "total": count})

@@ -19,6 +19,7 @@ import codecs
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 
+from web.dashboard.models import Project, ProjectSubdomain
 from web.index.models import ScanTask, LoginPageList, BanList, AccountDataTable
 from web.spider.models import SubDomainList, UrlTable
 
@@ -594,3 +595,27 @@ class SubDomainDetailsView(View):
         else:
             return JsonResponse({"code": 404, "status": False, "message": "Subdomain {} not Found.".format(id)})
 
+
+class SubDomainAssignView(View):
+
+    @staticmethod
+    def post(request, sub_id):
+        params = json.loads(request.body)
+
+        sdls = SubDomainList.objects.filter(id=sub_id).first()
+        project_id = check_gpc_undefined(params, "project_id", 0)
+        weight = check_gpc_undefined(params, "weight", 1)
+
+        if sdls:
+            p = Project.objects.filter(id=project_id).first()
+
+            if not p:
+                return JsonResponse({"code": 404, "status": False, "message": "Project {} not Found.".format(p.id)})
+
+            psub = ProjectSubdomain(project_id=p.id, subdomain=sdls.subdomain, title=sdls.title, banner=sdls.banner,
+                                    weight=weight, is_active=1)
+
+            psub.save()
+            return JsonResponse({"code": 200, "status": True, "message": "New Project Subdomain successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "Subdomain {} not Found.".format(sub_id)})
