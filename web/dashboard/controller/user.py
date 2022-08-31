@@ -1,0 +1,167 @@
+#!/usr/bin/env python
+# encoding: utf-8
+'''
+@author: LoRexxar
+@contact: lorexxar@gmail.com
+@file: user.py
+@time: 2022/8/30 18:35
+@desc:
+
+'''
+
+from __future__ import unicode_literals
+
+import os
+import json
+import time
+import codecs
+
+from django.views import View
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+from web.dashboard.models import UserProfile
+from django.contrib.auth.models import User
+from utils.base import check_gpc_undefined
+
+
+class UserListView(View):
+    """
+        用户列表
+    """
+
+    @staticmethod
+    def get(request):
+        size = 10
+        page = 1
+        username = ""
+        userdata_list = []
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        if "username" in request.GET:
+            username = request.GET['username']
+
+        if username:
+            users = User.objects.filter(username__contains=username)[(page - 1) * size:page * size]
+        else:
+            users = User.objects.all()[(page - 1) * size:page * size]
+        count = len(users)
+
+        for user in users:
+            userdata = {
+                "id": user.id,
+                "username": user.username,
+                "nickname": user.nickname,
+                "email": user.email,
+                "last_login": user.last_login,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+                "is_active": user.is_active,
+            }
+            user_profile = UserProfile.objects.filter(user_id=user.id).first()
+
+            if user_profile:
+                userdata["nickname"] = user_profile.nickname
+                userdata["iphone"] = user_profile.iphone
+                userdata["score"] = user_profile.score
+                userdata["level"] = user_profile.level
+
+            userdata_list.append(userdata)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(userdata_list), "total": count})
+
+
+class UserListCountView(View):
+    """
+        用户名列表
+    """
+
+    @staticmethod
+    def get(request):
+        count = User.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count})
+
+
+class UserDetailsView(View):
+    """
+        用户名详情
+    """
+
+    @staticmethod
+    def get(request, user_id):
+        userdata_list = []
+
+        users = User.objects.filter(id=user_id)
+        count = len(users)
+
+        for user in users:
+            userdata = {
+                "id": user.id,
+                "username": user.username,
+                "nickname": user.username,
+                "email": user.email,
+                "iphone": "",
+                "score": 0,
+                "level": 0,
+                "last_login": user.last_login,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+                "is_active": user.is_active,
+            }
+            user_profile = UserProfile.objects.filter(user_id=user.id).first()
+
+            if user_profile:
+                userdata["nickname"] = user_profile.nickname
+                userdata["iphone"] = user_profile.iphone
+                userdata["score"] = user_profile.score
+                userdata["level"] = user_profile.level
+
+            userdata_list.append(userdata)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(users), "total": count})
+
+    @staticmethod
+    def post(request, user_id):
+        params = json.loads(request.body)
+
+        user = User.objects.filter(id=user_id).first()
+
+        username = check_gpc_undefined(params, "username")
+        nickname = check_gpc_undefined(params, "nickname")
+        email = check_gpc_undefined(params, "email")
+        is_superuser = check_gpc_undefined(params, "is_superuser", 0)
+        is_staff = check_gpc_undefined(params, "is_staff", 0)
+        is_active = check_gpc_undefined(params, "is_active", 0)
+        iphone = check_gpc_undefined(params, "iphone")
+        score = check_gpc_undefined(params, "score", 0)
+        level = check_gpc_undefined(params, "level", 1)
+
+        if user:
+            user.username = username
+            user.email = email
+            user.is_superuser = is_superuser
+            user.is_active = is_active
+            user.is_staff = is_staff
+
+            userdata = UserProfile.objects.filter(user_id=user_id).first()
+
+            if userdata:
+                userdata.nickname = nickname
+                userdata.iphone = iphone
+                userdata.score = score
+                userdata.level = level
+                userdata.save()
+            else:
+                ud = UserProfile(user_id=user_id, nickname=nickname, iphone=iphone, score=score, level=level)
+                ud.save()
+
+            user.save()
+            return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "User not found"})
+

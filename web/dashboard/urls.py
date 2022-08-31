@@ -13,7 +13,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard import views
-from web.dashboard.controller import project, options
+from web.dashboard.controller import project, options, user
 
 
 app_name = "dashboard"
@@ -58,5 +58,10 @@ urlpatterns = [
     path("options/projectAssertsSeverity", options.ProjectAssertsSeverity, name="option_project_asserts_severity"),
     path("options/projectVulsSeverity", options.ProjectVulsSeverity, name="option_project_vuls_severity"),
     path("options/scaVulsSeverity", options.ScaVulsSeverity, name="option_sca_severity"),
+
+    # users
+    path("user", csrf_exempt(user.UserListView.as_view()), name="user"),
+    path("user/count", csrf_exempt(user.UserListCountView.as_view()), name="user_count"),
+    path("user/<int:user_id>", csrf_exempt(user.UserDetailsView.as_view()), name="user_detail"),
 
 ]
