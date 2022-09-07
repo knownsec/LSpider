@@ -58,6 +58,6 @@ class ProjectSubdomain(models.Model):
 class UserProfile(models.Model):
     user_id = models.IntegerField()
     nickname = models.CharField(max_length=30)
-    iphone = models.IntegerField()
+    iphone = models.CharField(max_length=20)
     score = models.IntegerField(default=0)
     level = models.IntegerField(default=0)

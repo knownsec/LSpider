@@ -64,4 +64,8 @@ urlpatterns = [
     path("user/count", csrf_exempt(user.UserListCountView.as_view()), name="user_count"),
     path("user/<int:user_id>", csrf_exempt(user.UserDetailsView.as_view()), name="user_detail"),
 
+    path("login", csrf_exempt(user.signin), name="user_login"),
+    path("register", csrf_exempt(user.signup), name="user_register"),
+    path("logout", csrf_exempt(user.logout), name="user_logout"),
+    path("getUserData", csrf_exempt(user.UserDetaView.as_view()), name="user_data"),
 ]

@@ -24,6 +24,11 @@ from web.dashboard.models import UserProfile
 from django.contrib.auth.models import User
 from utils.base import check_gpc_undefined
 
+from LSpider.settings import IS_OPEN_REGISTER
+from django.contrib import auth
+from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
+
 
 class UserListView(View):
     """
@@ -56,7 +61,7 @@ class UserListView(View):
             userdata = {
                 "id": user.id,
                 "username": user.username,
-                "nickname": user.nickname,
+                "nickname": user.username,
                 "email": user.email,
                 "last_login": user.last_login,
                 "is_superuser": user.is_superuser,
@@ -123,7 +128,7 @@ class UserDetailsView(View):
 
             userdata_list.append(userdata)
 
-        return JsonResponse({"code": 200, "status": True, "message": list(users), "total": count})
+        return JsonResponse({"code": 200, "status": True, "message": list(userdata_list), "total": count})
 
     @staticmethod
     def post(request, user_id):
@@ -165,3 +170,101 @@ class UserDetailsView(View):
         else:
             return JsonResponse({"code": 404, "status": False, "message": "User not found"})
 
+
+def signup(request):
+
+    if not IS_OPEN_REGISTER:
+        return JsonResponse({"code": 404, "status": False, "message": "Register is close."})
+
+    if request.method == 'POST':
+        params = json.loads(request.body)
+        if params:
+            username = check_gpc_undefined(params, "username")
+            nickname = check_gpc_undefined(params, "nickname")
+            password = check_gpc_undefined(params, "password")
+            iphone = check_gpc_undefined(params, "iphone")
+            email = check_gpc_undefined(params, "email")
+
+            u = User.objects.filter(username=username).first()
+            if not u:
+                user = User.objects.create_user(username=username, password=password, email=email)
+                user.save()
+
+                user_profile = UserProfile(user_id=user.id, nickname=nickname, iphone=iphone, level=1, score=0)
+                user_profile.save()
+
+                auth.login(request, user)
+                return JsonResponse({"code": 200, "status": True, "message": "Register successful"})
+            else:
+                return JsonResponse({"code": 404, "status": False, "message": "User is exist."})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "Something error."})
+    else:
+        return JsonResponse({"code": 404, "status": False, "message": "Something error."})
+
+
+def signin(request):
+    if request.method == 'POST':
+        params = json.loads(request.body)
+        username = check_gpc_undefined(params, "username")
+        password = check_gpc_undefined(params, "password")
+
+        user = auth.authenticate(username=username, password=password)
+
+        if user is not None and user.is_active:
+            auth.login(request, user)
+            return JsonResponse({"code": 200, "status": True, "message": "login successful"})
+        else:
+            messages.add_message(request, messages.ERROR, "Username or Password is incorrect.")
+            return JsonResponse({"code": 404, "status": False, "message": "User or Password is incorrect."})
+    else:
+        return JsonResponse({"code": 404, "status": False, "message": "Something error."})
+
+
+def logout(req):
+    auth.logout(req)
+    return JsonResponse({"code": 200, "status": True, "message": "login out successful"})
+
+
+class UserDetaView(View):
+    """
+        当前用户详情
+    """
+
+    @staticmethod
+    def get(request):
+        userdata_list = []
+
+        if request.user.is_authenticated:
+            username = request.user.username
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "login required."})
+
+        users = User.objects.filter(username=username)
+        count = len(users)
+
+        for user in users:
+            userdata = {
+                "id": user.id,
+                "username": user.username,
+                "nickname": user.username,
+                "email": user.email,
+                "iphone": "",
+                "score": 0,
+                "level": 0,
+                "last_login": user.last_login,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+                "is_active": user.is_active,
+            }
+            user_profile = UserProfile.objects.filter(user_id=user.id).first()
+
+            if user_profile:
+                userdata["nickname"] = user_profile.nickname
+                userdata["iphone"] = user_profile.iphone
+                userdata["score"] = user_profile.score
+                userdata["level"] = user_profile.level
+
+            userdata_list.append(userdata)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(userdata_list), "total": count})

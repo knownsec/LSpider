@@ -224,3 +224,6 @@ if os.path.isdir(VUL_LIST_PATH) is not True:
 
 # for test
 IS_TEST_ENVIRONMENT = False
+
+# for register
+IS_OPEN_REGISTER = True
