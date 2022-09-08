@@ -29,6 +29,8 @@ from django.contrib import auth
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 
+from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
+
 
 class UserListView(View):
     """
@@ -36,6 +38,7 @@ class UserListView(View):
     """
 
     @staticmethod
+    @login_level4_required
     def get(request):
         size = 10
         page = 1
@@ -87,6 +90,7 @@ class UserListCountView(View):
     """
 
     @staticmethod
+    @login_level4_required
     def get(request):
         count = User.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count})
@@ -98,6 +102,7 @@ class UserDetailsView(View):
     """
 
     @staticmethod
+    @login_level4_required
     def get(request, user_id):
         userdata_list = []
 
@@ -131,6 +136,7 @@ class UserDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(userdata_list), "total": count})
 
     @staticmethod
+    @login_level4_required
     def post(request, user_id):
         params = json.loads(request.body)
 
@@ -232,6 +238,7 @@ class UserDetaView(View):
     """
 
     @staticmethod
+    @login_level1_required
     def get(request):
         userdata_list = []
 

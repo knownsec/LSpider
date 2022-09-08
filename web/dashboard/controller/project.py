@@ -24,6 +24,8 @@ from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls
 from web.spider.models import SubDomainList, UrlTable
 from utils.base import check_gpc_undefined
 
+from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
+
 
 class ProjectListView(View):
     """
@@ -141,6 +143,7 @@ class ProjectAssetsListView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
+    @login_level2_required
     def post(request, project_id):
         params = json.loads(request.body)
 
@@ -188,6 +191,7 @@ class ProjectAssetsDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, project_id, asset_id):
 
         ps = ProjectAssets.objects.filter(project_id=project_id, id=asset_id, is_active=1).values()
@@ -196,6 +200,7 @@ class ProjectAssetsDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request, project_id, asset_id):
         params = json.loads(request.body)
         pa = ProjectAssets.objects.filter(id=asset_id).first()
@@ -241,6 +246,7 @@ class ProjectIpsListView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
+    @login_level2_required
     def post(request, project_id):
         params = json.loads(request.body)
         
@@ -284,6 +290,7 @@ class ProjectIpsDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, project_id, ips_id):
 
         pi = ProjectIps.objects.filter(project_id=project_id, id=ips_id, is_active=1).values()
@@ -292,6 +299,7 @@ class ProjectIpsDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(pi), "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request, project_id, ips_id):
         params = json.loads(request.body)
         pi = ProjectIps.objects.filter(id=ips_id).first()
@@ -333,6 +341,7 @@ class ProjectSubdomainListView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
+    @login_level2_required
     def post(request, project_id):
         params = json.loads(request.body)
 
@@ -381,6 +390,7 @@ class ProjectSubdomainDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, project_id, subdomain_id):
 
         ps = ProjectSubdomain.objects.filter(project_id=project_id, id=subdomain_id, is_active=1).values()
@@ -389,6 +399,7 @@ class ProjectSubdomainDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request, project_id, subdomain_id):
         params = json.loads(request.body)
         ps = ProjectSubdomain.objects.filter(id=subdomain_id).first()
@@ -439,6 +450,7 @@ class ProjectVulsListsView(View):
         return JsonResponse({"code": 200, "status": True, "message": ps_list, "total": count})
 
     @staticmethod
+    @login_level2_required
     def post(request, project_id):
         params = json.loads(request.body)
 
@@ -474,6 +486,7 @@ class ProjectVulsDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, project_id, vul_id):
 
         ps = ProjectVuls.objects.filter(project_id=project_id, id=vul_id, is_active=1).values()
@@ -482,6 +495,7 @@ class ProjectVulsDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request, project_id, vul_id):
         params = json.loads(request.body)
         pv = ProjectVuls.objects.filter(id=vul_id).first()
@@ -536,6 +550,7 @@ class ProjectUrlsListsView(View):
 class ProjectUrlsListCountView(View):
 
     @staticmethod
+    @login_level3_required
     def get(request, project_id):
         urllist = []
 

@@ -24,6 +24,7 @@ from web.index.models import ScanTask, LoginPageList, BanList, AccountDataTable
 from web.spider.models import SubDomainList, UrlTable
 
 from utils.base import check_gpc_undefined
+from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
 
 
 class ScanTaskListView(View):
@@ -32,6 +33,7 @@ class ScanTaskListView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request):
         size = 10
         page = 1
@@ -65,6 +67,7 @@ class ScanTaskListView(View):
         return JsonResponse({"code": 200, "status": True, "message": sts_list, "total": count, "keyword": target})
 
     @staticmethod
+    @login_level3_required
     def post(request):
         params = json.loads(request.body)
 
@@ -92,6 +95,7 @@ class ScanTaskListView(View):
 class ScanTaskListCountView(View):
 
     @staticmethod
+    @login_level3_required
     def get(request):
         count = ScanTask.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count })
@@ -103,6 +107,7 @@ class ScanTaskDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, task_id):
 
         sts = ScanTask.objects.filter(id=task_id).values()
@@ -111,6 +116,7 @@ class ScanTaskDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(sts), "total": count, })
 
     @staticmethod
+    @login_level3_required
     def post(request, task_id):
         params = json.loads(request.body)
 
@@ -148,6 +154,7 @@ class LoginPageListView(View):
     """
 
     @staticmethod
+    @login_level2_required
     def get(request):
         size = 10
         page = 1
@@ -172,6 +179,7 @@ class LoginPageListView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(lpls), "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request):
         params = json.loads(request.body)
 
@@ -193,6 +201,7 @@ class LoginPageListView(View):
 class LoginPageListCountView(View):
 
     @staticmethod
+    @login_level2_required
     def get(request):
         count = LoginPageList.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count })
@@ -204,6 +213,7 @@ class LoginPageDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, id):
         lpls = LoginPageList.objects.filter(id=id).values()
         count = len(lpls)
@@ -211,6 +221,7 @@ class LoginPageDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(lpls), "total": count, })
 
     @staticmethod
+    @login_level3_required
     def post(request, id):
         params = json.loads(request.body)
 
@@ -238,6 +249,7 @@ class BanListView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request):
         size = 10
         page = 1
@@ -254,6 +266,7 @@ class BanListView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(bls), "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request):
         params = json.loads(request.body)
 
@@ -274,6 +287,7 @@ class BanListView(View):
 class BanListCountView(View):
 
     @staticmethod
+    @login_level3_required
     def get(request):
         count = BanList.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count })
@@ -285,6 +299,7 @@ class BanListDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, id):
         bls = BanList.objects.filter(id=id).values()
         count = len(bls)
@@ -292,6 +307,7 @@ class BanListDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(bls), "total": count, })
 
     @staticmethod
+    @login_level3_required
     def post(request, id):
         params = json.loads(request.body)
 
@@ -317,6 +333,7 @@ class AccountDataListView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request):
         size = 10
         page = 1
@@ -340,6 +357,7 @@ class AccountDataListView(View):
         return JsonResponse({"code": 200, "status": True, "message": adls_list, "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request):
         params = json.loads(request.body)
 
@@ -362,6 +380,7 @@ class AccountDataListView(View):
 class AccountDataListCountView(View):
 
     @staticmethod
+    @login_level3_required
     def get(request):
         count = AccountDataTable.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count })
@@ -373,6 +392,7 @@ class AccountDataDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, id):
         adls = AccountDataTable.objects.filter(id=id).values()
         count = len(adls)
@@ -380,6 +400,7 @@ class AccountDataDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(adls), "total": count, })
 
     @staticmethod
+    @login_level3_required
     def post(request, id):
         params = json.loads(request.body)
 
@@ -409,6 +430,7 @@ class UrlTableListView(View):
     """
 
     @staticmethod
+    @login_level2_required
     def get(request):
         size = 100
         page = 1
@@ -435,6 +457,7 @@ class UrlTableListView(View):
         return JsonResponse({"code": 200, "status": True, "message": urls_list, "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request):
         params = json.loads(request.body)
 
@@ -456,6 +479,7 @@ class UrlTableListView(View):
 class UrlTableListCountView(View):
 
     @staticmethod
+    @login_level2_required
     def get(request):
         count = UrlTable.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count })
@@ -467,6 +491,7 @@ class UrlTableDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, id):
         urls = UrlTable.objects.filter(id=id).values()
         count = len(urls)
@@ -474,6 +499,7 @@ class UrlTableDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(urls), "total": count, })
 
     @staticmethod
+    @login_level3_required
     def post(request, id):
         params = json.loads(request.body)
 
@@ -501,6 +527,7 @@ class SubDomainListView(View):
     """
 
     @staticmethod
+    @login_level2_required
     def get(request):
         size = 20
         page = 1
@@ -529,6 +556,7 @@ class SubDomainListView(View):
         return JsonResponse({"code": 200, "status": True, "message": sdls_list, "total": count})
 
     @staticmethod
+    @login_level3_required
     def post(request):
         params = json.loads(request.body)
 
@@ -553,6 +581,7 @@ class SubDomainListView(View):
 class SubDomainListCountView(View):
 
     @staticmethod
+    @login_level2_required
     def get(request):
         count = SubDomainList.objects.all().count()
         return JsonResponse({"code": 200, "status": True, "total": count })
@@ -564,6 +593,7 @@ class SubDomainDetailsView(View):
     """
 
     @staticmethod
+    @login_level3_required
     def get(request, id):
         sdls = SubDomainList.objects.filter(id=id).values()
         count = len(sdls)
@@ -571,6 +601,7 @@ class SubDomainDetailsView(View):
         return JsonResponse({"code": 200, "status": True, "message": list(sdls), "total": count, })
 
     @staticmethod
+    @login_level3_required
     def post(request, id):
         params = json.loads(request.body)
 
@@ -599,6 +630,7 @@ class SubDomainDetailsView(View):
 class SubDomainAssignView(View):
 
     @staticmethod
+    @login_level3_required
     def post(request, sub_id):
         params = json.loads(request.body)
 

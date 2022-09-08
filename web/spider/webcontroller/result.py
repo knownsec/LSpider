@@ -22,6 +22,7 @@ from django.http import HttpResponse, JsonResponse
 
 from web.index.models import ScanTask, LoginPageList, BanList, AccountDataTable
 from web.dashboard.models import Project
+from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
 
 
 class ProjectListView(View):
@@ -30,6 +31,7 @@ class ProjectListView(View):
     """
 
     @staticmethod
+    @login_level4_required
     def get(request):
         size = 10
         page = 1

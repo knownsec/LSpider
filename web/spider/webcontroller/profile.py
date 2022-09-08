@@ -20,6 +20,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 
 from LSpider.settings import WECHAT_USER_LIST, WECHAT_ADMIN_LIST
+from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
 
 
 class ProfileView(View):
@@ -28,6 +29,7 @@ class ProfileView(View):
     """
 
     @staticmethod
+    @login_level4_required
     def get(request):
 
         profile = {
