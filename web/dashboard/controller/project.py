@@ -377,9 +377,30 @@ class ProjectSubdomainListView(View):
             size = int(request.GET['size'])
 
         ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
-        count = len(ps)
+        ps_list = []
 
-        return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
+        # 权重为0的子域名传染权重为2的子域名
+        for p in ps:
+            ps_list.append(p)
+            if p['weight'] == 0:
+                base_subdomain = p['subdomain']
+                sds = SubDomainList.objects.filter(subdomain__endswith=base_subdomain)
+
+                for sd in sds:
+                    ps_list.append(
+                        {
+                            "project_id": p['id'],
+                            "subdomain": sd.subdomain,
+                            "banner": sd.banner,
+                            "title": sd.title,
+                            "weight": 2,
+                            "is_active": 1,
+                        }
+                    )
+
+        count = len(ps_list)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(ps_list), "total": count})
 
     @staticmethod
     @login_level2_required
