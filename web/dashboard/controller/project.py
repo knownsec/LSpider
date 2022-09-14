@@ -276,6 +276,47 @@ class ProjectIpsListView(View):
         return JsonResponse({"code": 200, "status": True, "message": "New project ips successful"})
 
 
+class ProjectIpsListPublishView(View):
+    """
+        批量插入ip
+    """
+
+    @staticmethod
+    @login_level3_required
+    def post(request, project_id):
+        params = json.loads(request.body)
+
+        if "ipslistdata" not in params:
+            return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
+
+        p = Project.objects.filter(id=project_id).first()
+
+        if not p:
+            return JsonResponse({"code": 404, "status": False, "message": "Project not found"})
+
+        ipslistdata = check_gpc_undefined(params, "ipslistdata")
+        is_define = check_gpc_undefined(params, "is_define", 0)
+        ipsList = []
+
+        ipsSpliteList = ipslistdata.splitlines()
+        for ipss in ipsSpliteList:
+            ipsList.append({"ipdata": ipss})
+
+        ipsList_count = len(ipsList)
+
+        if not is_define:
+            return JsonResponse({"code": 200, "status": True, "message": list(ipsList), "total": ipsList_count})
+
+        for ipData in ipsList:
+            ipd = ProjectIps.objects.filter(project_id=project_id, ips=ipData['ipdata']).first()
+            if ipd:
+                continue
+
+            ipd = ProjectIps(project_id=project_id, ips=ipData['ipdata'], is_active=1)
+            ipd.save()
+        return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
+
+
 class ProjectIpsListCountView(View):
 
     @staticmethod
@@ -374,6 +415,48 @@ class ProjectSubdomainListView(View):
                                banner=banner, weight=weight, is_active=True)
         ps2.save()
         return JsonResponse({"code": 200, "status": True, "message": "New Project Subdomain successful"})
+
+
+class ProjectSubdomainListPublishView(View):
+    """
+        批量插入子域名
+    """
+
+    @staticmethod
+    @login_level3_required
+    def post(request, project_id):
+        params = json.loads(request.body)
+
+        if "subdomainlistdata" not in params:
+            return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
+
+        p = Project.objects.filter(id=project_id).first()
+
+        if not p:
+            return JsonResponse({"code": 404, "status": False, "message": "Project not found"})
+
+        subdomainlistdata = check_gpc_undefined(params, "subdomainlistdata")
+        is_define = check_gpc_undefined(params, "is_define", 0)
+        subdomainList = []
+
+        subdomainSpliteList = subdomainlistdata.splitlines()
+        subdomainList_count = len(subdomainSpliteList)
+
+        for subs in subdomainSpliteList:
+            subdomainList.append({"subdomaindata": subs})
+
+        if not is_define:
+            return JsonResponse({"code": 200, "status": True, "message": list(subdomainList), "total": subdomainList_count})
+
+        for subdomain_data in subdomainList:
+            sub = ProjectSubdomain.objects.filter(subdomain=subdomain_data['subdomaindata'].strip()).first()
+            if sub:
+                continue
+
+            ps = ProjectSubdomain(project_id=project_id, subdomain=subdomain_data['subdomaindata'].strip(), is_active=1, weight=1)
+            ps.save()
+
+        return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
 
 
 class ProjectSubdomainListCountView(View):

@@ -33,10 +33,13 @@ urlpatterns = [
          name="project_asset_detail"),
 
     path("project/<int:project_id>/ips", csrf_exempt(project.ProjectIpsListView.as_view()), name="project_ips"),
+    path("project/<int:project_id>/ips/publish", csrf_exempt(project.ProjectIpsListPublishView.as_view()), name="project_ips_publish"),
     path("project/<int:project_id>/ips/count", csrf_exempt(project.ProjectIpsListCountView.as_view()), name="project_ips_count"),
     path("project/<int:project_id>/ips/<int:ips_id>", csrf_exempt(project.ProjectIpsDetailsView.as_view()), name="project_ip_detail"),
 
     path("project/<int:project_id>/subdomain", csrf_exempt(project.ProjectSubdomainListView.as_view()), name="project_subdomain_vuls"),
+    path("project/<int:project_id>/subdomain/publish", csrf_exempt(project.ProjectSubdomainListPublishView.as_view()),
+         name="project_subdomain_publish"),
     path("project/<int:project_id>/subdomain/count", csrf_exempt(project.ProjectSubdomainListCountView.as_view()),
          name="project_subdomain_count"),
     path("project/<int:project_id>/subdomain/<int:subdomain_id>", csrf_exempt(project.ProjectSubdomainDetailsView.as_view()),
