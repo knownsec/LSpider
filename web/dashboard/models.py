@@ -11,7 +11,7 @@ class Project(models.Model):
     source = models.CharField(max_length=1000)
     type = models.IntegerField(default=0)
     description = models.CharField(max_length=5000, default=None, null=True)
-    create_time = models.DateTimeField()
+    create_time = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
 
