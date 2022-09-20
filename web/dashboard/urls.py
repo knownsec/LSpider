@@ -49,6 +49,12 @@ urlpatterns = [
     path("project/<int:project_id>/vuls/count", csrf_exempt(project.ProjectVulsListCountView.as_view()), name="project_vuls_count"),
     path("project/<int:project_id>/vuls/<int:vul_id>", csrf_exempt(project.ProjectVulsDetailsView.as_view()), name="project_vuls_details"),
 
+    path("project/<int:project_id>/announcements", csrf_exempt(project.ProjectAnnouncementsListsView.as_view()), name="project_announcements"),
+    path("project/<int:project_id>/announcements/count", csrf_exempt(project.ProjectAnnouncementsListCountView.as_view()),
+         name="project_announcements_count"),
+    path("project/<int:project_id>/announcements/<int:aid>", csrf_exempt(project.ProjectAnnouncementsDetailsView.as_view()),
+         name="project_announcements_details"),
+
     path("project/<int:project_id>/urls", csrf_exempt(project.ProjectUrlsListsView.as_view()), name="project_urls"),
     path("project/<int:project_id>/urls/count", csrf_exempt(project.ProjectUrlsListCountView.as_view()),
          name="project_urls_count"),

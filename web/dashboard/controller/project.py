@@ -20,7 +20,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain
+from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain, ProjectAnnouncement
 from web.spider.models import SubDomainList, UrlTable
 from utils.base import check_gpc_undefined
 
@@ -398,6 +398,7 @@ class ProjectSubdomainListView(View):
                         }
                     )
 
+        ps_list = sorted(ps_list, key=lambda e: e.__getitem__('weight'))[(page - 1) * size:page * size]
         count = len(ps_list)
 
         return JsonResponse({"code": 200, "status": True, "message": list(ps_list), "total": count})
@@ -470,11 +471,16 @@ class ProjectSubdomainListPublishView(View):
             return JsonResponse({"code": 200, "status": True, "message": list(subdomainList), "total": subdomainList_count})
 
         for subdomain_data in subdomainList:
-            sub = ProjectSubdomain.objects.filter(subdomain=subdomain_data['subdomaindata'].strip()).first()
+            subdata = subdomain_data['subdomaindata'].replace('*.', '').strip()
+
+            if not subdata:
+                continue
+
+            sub = ProjectSubdomain.objects.filter(subdomain=subdata).first()
             if sub:
                 continue
 
-            ps = ProjectSubdomain(project_id=project_id, subdomain=subdomain_data['subdomaindata'].strip(), is_active=1, weight=1)
+            ps = ProjectSubdomain(project_id=project_id, subdomain=subdata, is_active=1, weight=1)
             ps.save()
 
         return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
@@ -617,6 +623,98 @@ class ProjectVulsDetailsView(View):
         pv.severity = severity
         pv.details = details
         pv.save()
+        return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+
+
+class ProjectAnnouncementsListsView(View):
+    """
+        公告列表
+    """
+
+    @staticmethod
+    def get(request, project_id):
+        size = 10
+        page = 1
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        pas = ProjectAnnouncement.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
+        count = len(pas)
+
+        pas_list = list(pas)
+
+        for pa in pas_list:
+            pa['content'] = ""
+
+        return JsonResponse({"code": 200, "status": True, "message": pas_list, "total": count})
+
+    @staticmethod
+    @login_level2_required
+    def post(request, project_id):
+        params = json.loads(request.body)
+
+        if "title" not in params:
+            return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
+
+        p = Project.objects.filter(id=project_id).first()
+
+        if not p:
+            return JsonResponse({"code": 404, "status": False, "message": "Project not found"})
+
+        title = check_gpc_undefined(params, "title")
+        author = check_gpc_undefined(params, "author")
+        content = check_gpc_undefined(params, "content")
+        is_active = check_gpc_undefined(params, "is_active", 1)
+
+        pa = ProjectAnnouncement(project_id=project_id, title=title, author=author, content=content, is_active=True)
+        pa.save()
+        return JsonResponse({"code": 200, "status": True, "message": "New project Announcements successful"})
+
+
+class ProjectAnnouncementsListCountView(View):
+
+    @staticmethod
+    def get(request, project_id):
+        count = ProjectAnnouncement.objects.filter(project_id=project_id).count()
+        return JsonResponse({"code": 200, "status": True, "total": count })
+
+
+class ProjectAnnouncementsDetailsView(View):
+    """
+        项目公告详情
+    """
+
+    @staticmethod
+    def get(request, project_id, aid):
+
+        pas = ProjectAnnouncement.objects.filter(project_id=project_id, id=aid, is_active=1).values()
+        count = len(pas)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(pas), "total": count})
+
+    @staticmethod
+    @login_level3_required
+    def post(request, project_id, aid):
+        params = json.loads(request.body)
+        pa = ProjectAnnouncement.objects.filter(id=aid).first()
+
+        if not pa:
+            return JsonResponse({"code": 404, "status": False, "message": "Project Announcements not found"})
+
+        title = check_gpc_undefined(params, "title")
+        author = check_gpc_undefined(params, "author")
+        content = check_gpc_undefined(params, "content")
+        is_active = check_gpc_undefined(params, "is_active", 1)
+
+        pa.title = title
+        pa.author = author
+        pa.content = content
+        pa.is_active = is_active
+        pa.save()
         return JsonResponse({"code": 200, "status": True, "message": "update successful"})
 
 
