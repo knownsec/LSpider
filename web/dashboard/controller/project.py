@@ -671,7 +671,7 @@ class ProjectAnnouncementsListsView(View):
         content = check_gpc_undefined(params, "content")
         is_active = check_gpc_undefined(params, "is_active", 1)
 
-        pa = ProjectAnnouncement(project_id=project_id, title=title, author=author, content=content, is_active=True)
+        pa = ProjectAnnouncement(project_id=project_id, title=title, author=author, link=link, content=content, is_active=True)
         pa.save()
         return JsonResponse({"code": 200, "status": True, "message": "New project Announcements successful"})
 
@@ -714,6 +714,7 @@ class ProjectAnnouncementsDetailsView(View):
 
         pa.title = title
         pa.author = author
+        pa.link = link
         pa.content = content
         pa.is_active = is_active
         pa.save()
