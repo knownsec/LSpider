@@ -667,6 +667,7 @@ class ProjectAnnouncementsListsView(View):
 
         title = check_gpc_undefined(params, "title")
         author = check_gpc_undefined(params, "author")
+        link = check_gpc_undefined(params, "link")
         content = check_gpc_undefined(params, "content")
         is_active = check_gpc_undefined(params, "is_active", 1)
 
@@ -707,6 +708,7 @@ class ProjectAnnouncementsDetailsView(View):
 
         title = check_gpc_undefined(params, "title")
         author = check_gpc_undefined(params, "author")
+        link = check_gpc_undefined(params, "link")
         content = check_gpc_undefined(params, "content")
         is_active = check_gpc_undefined(params, "is_active", 1)
 

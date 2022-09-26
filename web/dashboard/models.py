@@ -58,6 +58,7 @@ class ProjectAnnouncement(models.Model):
     project_id = models.IntegerField()
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=200, null=True, default="")
+    link = models.CharField(max_length=500,null=True, default="")
     content = models.TextField(null=True, default="")
     create_time = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
