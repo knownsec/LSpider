@@ -232,7 +232,7 @@ def logout(req):
     return JsonResponse({"code": 200, "status": True, "message": "login out successful"})
 
 
-class UserDetaView(View):
+class UserDataView(View):
     """
         当前用户详情
     """

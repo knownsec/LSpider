@@ -63,13 +63,10 @@ class WebhookView(View):
     """
 
     def __init__(self, **kwargs):
-
         super().__init__(**kwargs)
-
         self.ReMess = ReMess
 
     def get(self, request):
-
         return HttpResponse("Hello Webhook.")
 
     def post(self, request):
@@ -86,9 +83,7 @@ New vuls:\n
 """
 
                 for key in received_json_data:
-
                     if key == 'plugin':
-
                         for no_use_key in ['dirscan', 'brute_force', 'baseline']:
                             if no_use_key in received_json_data[key]:
                                 return HttpResponse("Success Webhook.")

@@ -36,3 +36,18 @@ class LoginPageList(models.Model):
     url = models.CharField(max_length=1000)
     title = models.CharField(max_length=200, default="", null=True)
     is_active = models.BooleanField(default=True)
+
+
+class BackendLog(models.Model):
+    type = models.CharField(max_length=30)
+    log_text = models.TextField(null=True)
+    log_time = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=False)
+
+
+class FrontLog(models.Model):
+    user_id = models.IntegerField()
+    type = models.CharField(max_length=30)
+    log_text = models.TextField(null=True)
+    log_time = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=False)

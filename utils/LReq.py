@@ -164,7 +164,7 @@ class LReq:
 
     def getResp(self, url, cookies):
         url = self.check_url(url)
-        logger.info("[LReq] New request {}".format(url))
+        logger.info("[LReq] New request by python: {}".format(url))
         cookies = cookies[0] if cookies else ""
 
         r = self.s.get(url, headers=self.get_header(url, cookies), timeout=3)
@@ -173,14 +173,14 @@ class LReq:
 
     def getRespByChrome(self, url, cookies):
         url = self.check_url(url)
-        logger.info("[LReq] New request {}".format(url))
+        logger.info("[LReq] New request by chrome: {}".format(url))
         cookies = cookies[0] if cookies else ""
 
         return self.cs.get_resp(url, cookies)
 
     def postResp(self, url, data, cookies):
         url = self.check_url(url)
-        logger.info("[LReq] New request {}".format(url))
+        logger.info("[LReq] New request by python: {}".format(url))
         cookies = cookies[0] if cookies else ""
 
         r = self.s.post(url, data=data, headers=self.get_header(url, cookies), timeout=3)
@@ -189,7 +189,7 @@ class LReq:
 
     def postJsonResp(self, url, data, cookies):
         url = self.check_url(url)
-        logger.info("[LReq] New request {}".format(url))
+        logger.info("[LReq] New request by python: {}".format(url))
         cookies = cookies[0] if cookies else ""
 
         header = self.get_header(url, cookies)

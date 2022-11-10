@@ -22,6 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain, ProjectAnnouncement
 from web.spider.models import SubDomainList, UrlTable
+from django.contrib.auth.models import User
 from utils.base import check_gpc_undefined
 
 from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required

@@ -13,7 +13,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard import views
-from web.dashboard.controller import project, options, user
+from web.dashboard.controller import project, options, user, logs
 
 
 app_name = "dashboard"
@@ -73,8 +73,18 @@ urlpatterns = [
     path("user/count", csrf_exempt(user.UserListCountView.as_view()), name="user_count"),
     path("user/<int:user_id>", csrf_exempt(user.UserDetailsView.as_view()), name="user_detail"),
 
+    # logs
+    path("log", csrf_exempt(logs.NowFrontLogDataView.as_view()), name="log"),
+    path("log/count", csrf_exempt(logs.NowFrontLogListCountView.as_view()), name="log_count"),
+    path("log/backend", csrf_exempt(logs.BackendLogListView.as_view()), name="log_backend"),
+    path("log/backend/count", csrf_exempt(logs.BackendLogListCountView.as_view()), name="log_backend_count"),
+    path("log/backend/<int:log_id>", csrf_exempt(logs.BackendLogDetailsView.as_view()), name="log_backend_detail"),
+    path("log/front", csrf_exempt(logs.FrontLogListView.as_view()), name="log_front"),
+    path("log/front/count", csrf_exempt(logs.FrontLogListCountView.as_view()), name="log_front_count"),
+    path("log/front/<int:log_id>", csrf_exempt(logs.FrontLogDetailsView.as_view()), name="log_front_detail"),
+
     path("login", csrf_exempt(user.signin), name="user_login"),
     path("register", csrf_exempt(user.signup), name="user_register"),
     path("logout", csrf_exempt(user.logout), name="user_logout"),
-    path("getUserData", csrf_exempt(user.UserDetaView.as_view()), name="user_data"),
+    path("getUserData", csrf_exempt(user.UserDataView.as_view()), name="user_data"),
 ]

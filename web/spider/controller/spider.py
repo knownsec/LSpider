@@ -195,7 +195,6 @@ class SpiderCoreBackend:
 
             if lastscantime:
                 # if (nowtime - lastscantime).days > 30:
-
                 # 1 mouth
                 target = subdomain.subdomain.strip()
 
@@ -269,7 +268,6 @@ class SpiderCore:
         except json.decoder.JSONDecodeError:
             # 获取任务权重
             task_weight = int(header.priority)
-
             task = eval(message)
 
             if checkbanlist(task['url']):
@@ -417,6 +415,7 @@ class SpiderCore:
             backend_cookies = ""
             title = ""
 
+            # 发起对目标的请求
             if target['type'] == 'link':
                 code, content, title = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
@@ -426,6 +425,7 @@ class SpiderCore:
             if code == -1:
                 return
 
+            # 如果这个页面需要登录，那么把链接塞入加急队列之后等待对应的鉴权被设置
             if code == 2:
                 # 代表这个页面需要登录
                 backend_cookies, auth_status = check_login_or_get_cookie(target['url'], title)
@@ -454,7 +454,10 @@ class SpiderCore:
                     sd.title = title
                     sd.save()
 
+            # 分割html页面
             result_list = html_parser(content)
+
+            # 解析html中的url
             result_list = url_parser(target['url'], result_list, target['deep'], backend_cookies)
 
             # 继续把链接加入列表
